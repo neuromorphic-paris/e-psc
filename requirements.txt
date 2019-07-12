@@ -1,0 +1,3 @@
+-e git+git@bitbucket.org:mlold/prosper.git#egg=prosper
+matplotlib
+seaborn
