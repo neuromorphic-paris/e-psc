@@ -52,11 +52,11 @@ def Time_Surface_all(xdim, ydim, timestamp, timecoeff, dataset, num_polarities, 
     tsurface = np.zeros([ydim,xdim*num_polarities])
     for i in range(len(tsurface_array)):
         if tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]==0:
-            tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]=tsurface_array[i]  
+            tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]=tsurface_array[i] 
     #plot graphs if verbose is set "True"
-    if (verbose==True):
-        plt.figure()
+    if (verbose):
         sns.heatmap(tsurface)
+        plt.show()
 
     return tsurface
 
@@ -109,8 +109,9 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
     for i in range(len(tsurface_array)):
         tsurface[tmpdata[1][i][1]+offs[1],tmpdata[1][i][0]+offs[0]+xdim*tmpdata[2][i]]=tsurface_array[i]  
     #plot graphs if verbose is set "True"
-    if (verbose==True):
-        plt.figure()
+    if (verbose):
         sns.heatmap(tsurface)
+        plt.show()
 
     return tsurface
+
