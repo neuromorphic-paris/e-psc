@@ -21,7 +21,7 @@ rec_size = 35 # size of the pip cards (square so dimension D = rec_size * rec_si
 tau = 5000 # time constant for the construction of time surfaces
 polarities = 1 # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
-#### BUILDING THE LEARNING AND TESTING DATASETS ####
+#### BUILDING THE LEARNING DATASET ####
 learning_set_length = 2
 testing_set_length = 5
 
@@ -50,9 +50,14 @@ for recording in range(len(dataset_learning)):
         index = x + rec_size * y # 2D to 1D mapping
         ts[recording][index] = time_surface
 
+# reshaping the time surface list as Number of Samples x Number of Features
+ts = ts.reshape((ts.shape[0]*ts.shape[1],-1))
+
+#### BUILDING THE TESTING DATASET ####
+
 # setting up the testing dataset
 number_of_samples = len(dataset_testing)
-ts_test = np.zeros((number_of_samples,number_of_features,ts_size,ts_size))
+ts_test = np.ones((number_of_samples,number_of_features,ts_size,ts_size)) * truncnorm.rvs(0, 1e-6)
 for recording in range(len(dataset_testing)):
     for k in range(len(dataset_testing[recording][0])):
         single_event = [dataset_testing[recording][0][k], dataset_testing[recording][1][k]]
@@ -70,10 +75,10 @@ for recording in range(len(dataset_testing)):
         index = x + rec_size * y # 2D to 1D mapping
         ts_test[recording][index] = time_surface
 
-#The code takes in data formated as Number of Samples x Number of Features so we need to reshape
-ts = ts.reshape((ts.shape[0]*ts.shape[1],-1))
+# reshaping the time surface list as Number of Samples x Number of Features
 ts_test = ts_test.reshape((ts_test.shape[0]*ts_test.shape[1],-1))
 
+#### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
     # Dimensionality of the model
     H=100     # let's start with 100
@@ -86,8 +91,6 @@ if learning:
     # Import and instantiate a model
     from prosper.em.camodels.bsc_et import BSC_ET
     model = BSC_ET(D, H, Hprime, gamma)
-
-
 
     # Choose annealing schedule
     from prosper.em.annealing import LinearAnnealing

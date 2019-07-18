@@ -4,6 +4,7 @@
 Created on Mon Oct  8 14:10:06 2018
 
 @author: marcorax
+@edited by: Omar Oubari on 18/07/2019
 
 Function used to generate the Time surfaces, 
 please note that these functions expect the dataset to be ordered from the 
@@ -13,8 +14,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+from scipy.stats import truncnorm
 from bisect import bisect_left, bisect_right
-
 
 
 ## Time_Surface_all: function that computes the Time_surface of an entire dataset,
@@ -49,7 +50,7 @@ def Time_Surface_all(xdim, ydim, timestamp, timecoeff, dataset, num_polarities, 
     #and we want each layer be dependant on the timecoeff of the timesurface
     #Note that exp is monotone and the timestamps are ordered, thus the last 
     #values of the dataset will be the lowest too
-    tsurface = np.zeros([ydim,xdim*num_polarities])
+    tsurface = np.ones([ydim,xdim*num_polarities]) * truncnorm.rvs(0, 1e-6)
     for i in range(len(tsurface_array)):
         if tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]==0:
             tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]=tsurface_array[i] 
@@ -104,7 +105,7 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
     #and we want each layer be dependant on the timecoeff of the timesurface
     #Note that exp is monotone and the timestamps are ordered, thus the last 
     #values of the dataset will be the lowest too
-    tsurface = np.zeros([ydim,xdim*num_polarities])
+    tsurface = np.ones([ydim,xdim*num_polarities]) * truncnorm.rvs(0, 1e-6)
     offs = [np.int(np.floor(xdim/2)),np.int(np.floor(ydim/2))]
     for i in range(len(tsurface_array)):
         tsurface[tmpdata[1][i][1]+offs[1],tmpdata[1][i][0]+offs[0]+xdim*tmpdata[2][i]]=tsurface_array[i]  
