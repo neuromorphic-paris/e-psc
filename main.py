@@ -1,6 +1,7 @@
 import sys
 import prosper 
 import numpy as np
+from scipy.stats import truncnorm
 
 from utils.Cards_loader import Cards_loader
 from utils.Time_Surface_generators import Time_Surface_all, Time_Surface_event
@@ -32,7 +33,7 @@ number_of_features = rec_size**2
 
 # setting up the learning dataset
 number_of_samples = len(dataset_learning)
-ts = np.zeros((number_of_samples,number_of_features,ts_size,ts_size))
+ts = np.ones((number_of_samples,number_of_features,ts_size,ts_size)) * truncnorm.rvs(0, 1e-6)
 for recording in range(len(dataset_learning)):
     for k in range(len(dataset_learning[recording][0])):
         single_event = [dataset_learning[recording][0][k], dataset_learning[recording][1][k]]
