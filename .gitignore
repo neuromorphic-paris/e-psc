@@ -1,2 +1,8 @@
 
 \.DS_Store
+
+utils/__pycache__/Cards_loader\.cpython-37\.pyc
+
+utils/__pycache__/readwriteatis_kaerdat\.cpython-37\.pyc
+
+utils/__pycache__/Time_Surface_generators\.cpython-37\.pyc
