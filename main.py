@@ -98,7 +98,7 @@ if learning:
 
 	# Configure DataLogger
 	print_list = ('T', 'L', 'pi', 'sigma')
-	dlog.set_handler(print_list, +TextPrinter) #prints things to terminal
+	dlog.set_handler(print_list, TextPrinter) #prints things to terminal
 	txt_list = ('T', 'L', 'pi', 'sigma')
 	dlog.set_handler(txt_list, StoreToTxt, output_path+'/results.txt')  #stores things in a txt file
 	h5_list = ('T', 'L', 'pi', 'sigma','W')
