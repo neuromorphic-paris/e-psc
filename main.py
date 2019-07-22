@@ -27,8 +27,8 @@ polarities = 1 # number of polarities that we will use in the dataset (1 because
 feature_type = 1
 
 #### BUILDING THE LEARNING DATASET ####
-learning_set_length = 1
-testing_set_length = 1
+learning_set_length = 12
+testing_set_length = 5
 
 data_folder = "datasets/pips/"
 dataset_learning, labels_learning, dataset_testing, labels_testing = Cards_loader(data_folder, learning_set_length,testing_set_length)
