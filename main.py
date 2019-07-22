@@ -106,7 +106,7 @@ if learning:
 
 	# Choose annealing schedule
 	from prosper.em.annealing import LinearAnnealing
-	anneal = LinearAnnealing(20) # decrease
+	anneal = LinearAnnealing(120) # decrease
 	anneal['T'] = [(0, 5.), (.8, 1.)]
 	anneal['Ncut_factor'] = [(0,0.),(2./3,1.)]
 	anneal['anneal_prior'] = False
@@ -124,3 +124,4 @@ if learning:
 	my_test_data={'y':ts_test}
 	res=model.inference(anneal,em.lparams, my_test_data)
 	sparse_codes = res['s'][:,0,:]#should be Number of samples x H
+	dlog.close()
