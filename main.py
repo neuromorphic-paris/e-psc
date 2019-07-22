@@ -90,7 +90,7 @@ if learning:
 
 	# Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
 	Hprime = 8
-	gamma = 5
+	gamma = 6
 	 
 	# Import and instantiate a model
 	from prosper.em.camodels.bsc_et import BSC_ET
@@ -108,7 +108,11 @@ if learning:
 	from prosper.em.annealing import LinearAnnealing
 	anneal = LinearAnnealing(120) # decrease
 	anneal['T'] = [(0, 5.), (.8, 1.)]
-	anneal['Ncut_factor'] = [(0,0.),(2./3,1.)]
+	anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
+	# anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
+	# anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
+	anneal['W_noise'] = [(0,1.),(0.8,0.)]
+	# anneal['pi_noise'] = [(0,1.),(0.8,0.)]
 	anneal['anneal_prior'] = False
 
 
