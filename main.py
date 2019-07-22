@@ -24,6 +24,7 @@ ts_size = 11 # size of the time surfaces
 rec_size = 35 # size of the pip cards (square so dimension D = rec_size * rec_size)
 tau = 5000 # time constant for the construction of time surfaces
 polarities = 1 # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
+feature_type = 1
 
 #### BUILDING THE LEARNING DATASET ####
 learning_set_length = 12
@@ -32,55 +33,95 @@ testing_set_length = 5
 data_folder = "datasets/pips/"
 dataset_learning, labels_learning, dataset_testing, labels_testing = Cards_loader(data_folder, learning_set_length,testing_set_length)
 
-# number of features  
-number_of_features = rec_size**2
+if feature_type == 0:
+	# number of features  
+	number_of_features = rec_size**2
 
-# setting up the learning dataset
-number_of_samples = len(dataset_learning)
-ts = np.ones((number_of_samples,number_of_features,ts_size,ts_size)) * truncnorm.rvs(0, 1e-6)
-for recording in range(len(dataset_learning)):
-	for k in range(len(dataset_learning[recording][0])):
-		single_event = [dataset_learning[recording][0][k], dataset_learning[recording][1][k]]
-		time_surface = Time_Surface_event(xdim = ts_size,
-										  ydim = ts_size,
-										  event = single_event,
-										  timecoeff = tau,
-										  dataset = dataset_learning[recording],
-										  num_polarities = polarities,
-										  verbose = False)
+	# setting up the learning dataset
+	number_of_samples = len(dataset_learning)
+	ts = np.ones((number_of_samples,number_of_features,ts_size,ts_size)) * truncnorm.rvs(0, 1e-6)
+	for recording in range(len(dataset_learning)):
+		for k in range(len(dataset_learning[recording][0])):
+			single_event = [dataset_learning[recording][0][k], dataset_learning[recording][1][k]]
+			time_surface = Time_Surface_event(xdim = ts_size,
+											  ydim = ts_size,
+											  event = single_event,
+											  timecoeff = tau,
+											  dataset = dataset_learning[recording],
+											  num_polarities = polarities,
+											  verbose = False)
 
-		x = single_event[1][0]
-		y = single_event[1][1]
-		index = x + rec_size * y # 2D to 1D mapping
-		ts[recording][index] = time_surface
+			x = single_event[1][0]
+			y = single_event[1][1]
+			index = x + rec_size * y # 2D to 1D mapping
+			ts[recording][index] = time_surface
 
-# reshaping the time surface list as Number of Samples x Number of Features
-ts = ts.reshape((ts.shape[0]*ts.shape[1],-1))
+	# reshaping the time surface list as Number of Samples x Number of Features
+	ts = ts.reshape((ts.shape[0]*ts.shape[1],-1))
 
-#### BUILDING THE TESTING DATASET ####
+	# setting up the testing dataset
+	number_of_samples = len(dataset_testing)
+	ts_test = np.ones((number_of_samples,number_of_features,ts_size,ts_size)) * truncnorm.rvs(0, 1e-6)
+	for recording in range(len(dataset_testing)):
+		for k in range(len(dataset_testing[recording][0])):
+			single_event = [dataset_testing[recording][0][k], dataset_testing[recording][1][k]]
 
-# setting up the testing dataset
-number_of_samples = len(dataset_testing)
-ts_test = np.ones((number_of_samples,number_of_features,ts_size,ts_size)) * truncnorm.rvs(0, 1e-6)
-for recording in range(len(dataset_testing)):
-	for k in range(len(dataset_testing[recording][0])):
-		single_event = [dataset_testing[recording][0][k], dataset_testing[recording][1][k]]
+			time_surface = Time_Surface_event(xdim = ts_size,
+											  ydim = ts_size,
+											  event = single_event,
+											  timecoeff = tau,
+											  dataset = dataset_testing[recording],
+											  num_polarities = polarities,
+											  verbose = False)
 
-		time_surface = Time_Surface_event(xdim = ts_size,
-										  ydim = ts_size,
-										  event = single_event,
-										  timecoeff = tau,
-										  dataset = dataset_testing[recording],
-										  num_polarities = polarities,
-										  verbose = False)
+			x = single_event[1][0]
+			y = single_event[1][1]
+			index = x + rec_size * y # 2D to 1D mapping
+			ts_test[recording][index] = time_surface
 
-		x = single_event[1][0]
-		y = single_event[1][1]
-		index = x + rec_size * y # 2D to 1D mapping
-		ts_test[recording][index] = time_surface
+	# reshaping the time surface list as Number of Samples x Number of Features
+	ts_test = ts_test.reshape((ts_test.shape[0]*ts_test.shape[1],-1))
 
-# reshaping the time surface list as Number of Samples x Number of Features
-ts_test = ts_test.reshape((ts_test.shape[0]*ts_test.shape[1],-1))
+elif feature_type == 1:
+	# setting up the learning dataset
+	number_of_samples = sum([len(dataset_learning[j][0]) for j in range(len(dataset_learning))])
+
+	number_of_features = ts_size**2
+	ts = np.zeros((number_of_samples, ts_size, ts_size))
+
+	idx = 0
+	for recording in range(len(dataset_learning)):
+		for k in range(len(dataset_learning[recording][0])):
+			single_event = [dataset_learning[recording][0][k], dataset_learning[recording][1][k]]
+			time_surface = Time_Surface_event(xdim = ts_size,
+											  ydim = ts_size,
+											  event = single_event,
+											  timecoeff = tau,
+											  dataset = dataset_learning[recording],
+											  num_polarities = polarities,
+											  verbose = False)
+			ts[idx] = time_surface
+			idx += 1
+	ts = ts.reshape((ts.shape[0],-1))
+
+	# setting up the testing dataset
+	number_of_samples = sum([len(dataset_testing[j][0]) for j in range(len(dataset_testing))])
+	ts_test = np.zeros((number_of_samples, ts_size, ts_size))
+
+	idx = 0
+	for recording in range(len(dataset_testing)):
+		for k in range(len(dataset_testing[recording][0])):
+			single_event = [dataset_testing[recording][0][k], dataset_testing[recording][1][k]]
+			time_surface = Time_Surface_event(xdim = ts_size,
+											  ydim = ts_size,
+											  event = single_event,
+											  timecoeff = tau,
+											  dataset = dataset_testing[recording],
+											  num_polarities = polarities,
+											  verbose = False)
+			ts_test[idx] = time_surface
+			idx += 1
+	ts_test = ts_test.reshape((ts_test.shape[0],-1))
 
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
@@ -106,7 +147,7 @@ if learning:
 
 	# Choose annealing schedule
 	from prosper.em.annealing import LinearAnnealing
-	anneal = LinearAnnealing(120) # decrease
+	anneal = LinearAnnealing(20) # decrease
 	anneal['T'] = [(0, 5.), (.8, 1.)]
 	anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
 	# anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
