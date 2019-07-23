@@ -50,7 +50,7 @@ def Time_Surface_all(xdim, ydim, timestamp, timecoeff, dataset, num_polarities, 
     #and we want each layer be dependant on the timecoeff of the timesurface
     #Note that exp is monotone and the timestamps are ordered, thus the last 
     #values of the dataset will be the lowest too
-    tsurface = np.ones([ydim,xdim*num_polarities]) * truncnorm.rvs(0, 1e-6)
+    tsurface = np.zeros([ydim,xdim*num_polarities])
     for i in range(len(tsurface_array)):
         if tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]==0:
             tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]=tsurface_array[i] 
@@ -105,7 +105,7 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
     #and we want each layer be dependant on the timecoeff of the timesurface
     #Note that exp is monotone and the timestamps are ordered, thus the last 
     #values of the dataset will be the lowest too
-    tsurface = np.ones([ydim,xdim*num_polarities]) * truncnorm.rvs(0, 1e-6)
+    tsurface = np.zeros([ydim,xdim*num_polarities])
     offs = [np.int(np.floor(xdim/2)),np.int(np.floor(ydim/2))]
     for i in range(len(tsurface_array)):
         tsurface[tmpdata[1][i][1]+offs[1],tmpdata[1][i][0]+offs[0]+xdim*tmpdata[2][i]]=tsurface_array[i]  
