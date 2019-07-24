@@ -132,7 +132,7 @@ elif feature_type == 1:
 			test_labels.append(recording)
 			idx += 1
 	ts_test = ts_test.reshape((ts_test.shape[0],-1))
-import ipdb;ipdb.set_trace()
+
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
 	# Dimensionality of the model
