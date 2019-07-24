@@ -12,6 +12,7 @@ from prosper.em.camodels.bsc_et import BSC_ET
 from prosper.utils import create_output_path 
 from prosper.utils.datalog import dlog, StoreToH5, TextPrinter, StoreToTxt
 
+
 import os 
 
 np.set_printoptions(threshold=sys.maxsize)
@@ -20,6 +21,8 @@ output_path = create_output_path()
 #### PARAMETERS ####
 
 learning = True # Decide whether to run the sparse coding algorithm
+classification	= True # Run classification
+
 ts_size = 11 # size of the time surfaces
 rec_size = 35 # size of the pip cards (square so dimension D = rec_size * rec_size)
 tau = 5000 # time constant for the construction of time surfaces
@@ -84,12 +87,14 @@ if feature_type == 0:
 
 elif feature_type == 1:
 	# setting up the learning dataset
-	number_of_samples = sum([len(dataset_learning[j][0]) for j in range(len(dataset_learning))])
+	sizes_of_training_samples = [len(dataset_learning[j][0]) for j in range(len(dataset_learning))]
+	number_of_samples = sum(sizes_of_training_samples)
 
 	number_of_features = ts_size**2
 	ts = np.zeros((number_of_samples, ts_size, ts_size))
 
 	idx = 0
+	training_labels=[]
 	for recording in range(len(dataset_learning)):
 		for k in range(len(dataset_learning[recording][0])):
 			single_event = [dataset_learning[recording][0][k], dataset_learning[recording][1][k]]
@@ -101,14 +106,18 @@ elif feature_type == 1:
 											  num_polarities = polarities,
 											  verbose = False)
 			ts[idx] = time_surface
+			training_labels.append(recording)
 			idx += 1
 	ts = ts.reshape((ts.shape[0],-1))
 
 	# setting up the testing dataset
-	number_of_samples = sum([len(dataset_testing[j][0]) for j in range(len(dataset_testing))])
+	sizes_of_testing_samples = [len(dataset_testing[j][0]) for j in range(len(dataset_testing))]
+
+	number_of_samples = sum(sizes_of_testing_samples)
 	ts_test = np.zeros((number_of_samples, ts_size, ts_size))
 
 	idx = 0
+	test_labels=[]
 	for recording in range(len(dataset_testing)):
 		for k in range(len(dataset_testing[recording][0])):
 			single_event = [dataset_testing[recording][0][k], dataset_testing[recording][1][k]]
@@ -120,9 +129,10 @@ elif feature_type == 1:
 											  num_polarities = polarities,
 											  verbose = False)
 			ts_test[idx] = time_surface
+			test_labels.append(recording)
 			idx += 1
 	ts_test = ts_test.reshape((ts_test.shape[0],-1))
-
+import ipdb;ipdb.set_trace()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
 	# Dimensionality of the model
@@ -147,7 +157,7 @@ if learning:
 
 	# Choose annealing schedule
 	from prosper.em.annealing import LinearAnnealing
-	anneal = LinearAnnealing(120) # decrease
+	anneal = LinearAnnealing(2) # decrease
 	anneal['T'] = [(0, 5.), (.8, 1.)]
 	anneal['Ncut_factor'] = [(0,0.),(0.5,0.),(0.6,1.)]
 	# anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
@@ -170,3 +180,39 @@ if learning:
 	res=model.inference(anneal,em.lparams, my_test_data)
 	sparse_codes = res['s'][:,0,:]#should be Number of samples x H
 	dlog.close()
+
+if classification:
+	
+	my_train_data={'y':ts}
+	res_train = model.inference(anneal,em.lparams,my_train_data)
+	
+	train_features = []
+	start = 0
+	for i in range(len(sizes_of_training_samples)):
+		stop = start + sizes_of_training_samples[i]
+		train_features.append(res_train['s'][start:stop,0,:].mean(0))
+		start = stop
+
+	train_features=np.array(train_features)
+	
+	my_test_data={'y':ts_test}
+	res_test = model.inference(anneal,em.lparams,my_test_data)
+
+	test_features = []
+	start = 0
+	for i in range(len(sizes_of_testing_samples)):
+		stop = start+sizes_of_testing_samples[i]
+		test_features.append(res_test['s'][start:stop,0,:].mean(0))
+		start = stop
+	test_features=np.array(test_features)
+
+	from sklearn.linear_model import LogisticRegression
+	from sklearn import metrics
+
+	lreg=LogisticRegression()
+	lreg.fit(train_features,labels_learning)
+	predicted_labels= lreg.predict(testing_features)
+
+	print("Classification report for classifier %s:\n%s\n"
+	      % (classifier, metrics.classification_report(labels_testing, predicted_labels)))
+	print("Confusion matrix:\n%s" % metrics.confusion_matrix(labels_testing, predicted_labels))
