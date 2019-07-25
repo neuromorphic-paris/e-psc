@@ -211,8 +211,8 @@ if classification:
 
 	lreg=LogisticRegression()
 	lreg.fit(train_features,labels_learning)
-	predicted_labels= lreg.predict(testing_features)
+	predicted_labels= lreg.predict(test_features)
 
 	print("Classification report for classifier %s:\n%s\n"
-	      % (classifier, metrics.classification_report(labels_testing, predicted_labels)))
+	      % (lreg, metrics.classification_report(labels_testing, predicted_labels)))
 	print("Confusion matrix:\n%s" % metrics.confusion_matrix(labels_testing, predicted_labels))
