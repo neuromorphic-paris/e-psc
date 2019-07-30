@@ -90,10 +90,20 @@ if learning:
     ts = torch.from_numpy(ts.reshape((ts.shape[0], 1, sz, sz)).astype(np.float32))
     ts_test = torch.from_numpy(ts_test.reshape((ts_test.shape[0], 1, sz, sz)).astype(np.float32))
     sc = Scattering2D(J=3, shape=(sz, sz))
+    if torch.cuda.is_available():
+        print("Using Cuda")
+        sc.cuda()
+        ts.cuda()
+        ts_test.cuda()
+    else:
+        print("Not Using cuda")
     train_coef = sc(ts)
     test_coef = sc(ts_test)
+    if torch.cuda.is_available():
+        train_coef = train_coef.cpu()
+        test_coef = test_coef.cpu()
     t2 = time()
-    print("Scattering lasted {}s".format(t2-t1))
+    print("Scattering lasted {}s".format(t2 - t1))
 
 
 if classification:
