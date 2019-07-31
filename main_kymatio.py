@@ -12,19 +12,20 @@ from time import time
 np.set_printoptions(threshold=sys.maxsize)
 
 
-#### PARAMETERS ####
+# PARAMETERS #
 
 learning = True  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
 
-ts_size = 17  # size of the time surfaces
+ts_size = 9  # size of the time surfaces
 # size of the pip cards (square so dimension D = rec_size * rec_size)
 rec_size = 35
 tau = 5000  # time constant for the construction of time surfaces
-# number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
+# number of polarities that we will use in the dataset
+# (1 because polarities are not informative in the cards dataset)
 polarities = 1
 
-#### IMPORTING DATASET ####
+# IMPORTING DATASET #
 learning_set_length = 12
 testing_set_length = 5
 
@@ -32,13 +33,13 @@ data_folder = "datasets/pips/"
 dataset_learning, labels_training, dataset_testing, labels_testing = Cards(
     data_folder, learning_set_length, testing_set_length)
 
-#### BUILDING THE LEARNING DATASET ####
+# BUILDING THE LEARNING DATASET #
 sizes_of_training_samples = [len(dataset_learning[j][0])
                              for j in range(len(dataset_learning))]
 number_of_samples = sum(sizes_of_training_samples)
 
 number_of_features = ts_size**2
-ts = np.zeros((number_of_samples, ts_size-1, ts_size-1))
+ts = np.zeros((number_of_samples, ts_size - 1, ts_size - 1))
 
 idx = 0
 training_labels = []
@@ -53,17 +54,17 @@ for recording in range(len(dataset_learning)):
                                           dataset=dataset_learning[recording],
                                           num_polarities=polarities,
                                           verbose=False)
-        ts[idx] = time_surface[:-1,:-1]
+        ts[idx] = time_surface[:-1, :-1]
         training_labels.append(recording)
         idx += 1
 ts = ts.reshape((ts.shape[0], -1))
 
-#### BUILDING THE TESTING DATASET ####
+# BUILDING THE TESTING DATASET #
 sizes_of_testing_samples = [len(dataset_testing[j][0])
                             for j in range(len(dataset_testing))]
 
 number_of_samples = sum(sizes_of_testing_samples)
-ts_test = np.zeros((number_of_samples, ts_size-1, ts_size-1))
+ts_test = np.zeros((number_of_samples, ts_size - 1, ts_size - 1))
 
 idx = 0
 test_labels = []
@@ -78,7 +79,7 @@ for recording in range(len(dataset_testing)):
                                           dataset=dataset_testing[recording],
                                           num_polarities=polarities,
                                           verbose=False)
-        ts_test[idx] = time_surface[:-1,:-1]
+        ts_test[idx] = time_surface[:-1, :-1]
         test_labels.append(recording)
         idx += 1
 ts_test = ts_test.reshape((ts_test.shape[0], -1))
@@ -89,7 +90,7 @@ if learning:
     t1 = time()
     ts = torch.from_numpy(ts.reshape((ts.shape[0], 1, sz, sz)).astype(np.float32))
     ts_test = torch.from_numpy(ts_test.reshape((ts_test.shape[0], 1, sz, sz)).astype(np.float32))
-    sc = Scattering2D(J=3, shape=(sz, sz))
+    sc = Scattering2D(J=2, shape=(sz, sz))
     if torch.cuda.is_available():
         print("Using Cuda")
         sc.cuda()
@@ -100,11 +101,10 @@ if learning:
     train_coef = sc(ts)
     test_coef = sc(ts_test)
     if torch.cuda.is_available():
-        train_coef = train_coef.cpu()
-        test_coef = test_coef.cpu()
+        train_coef.cpu()
+        test_coef.cpu()
     t2 = time()
     print("Scattering lasted {}s".format(t2 - t1))
-
 
 if classification:
 
