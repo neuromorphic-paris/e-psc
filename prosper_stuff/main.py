@@ -9,6 +9,7 @@ from utils.Time_Surface_generators import Time_Surface_all, Time_Surface_event
 from prosper.em import EM
 from prosper.em.annealing import LinearAnnealing
 from prosper.em.camodels.bsc_et import BSC_ET
+from prosper.em.camodels.dbsc_et import DBSC_ET
 from prosper.utils import create_output_path
 from prosper.utils.datalog import dlog, StoreToH5, TextPrinter, StoreToTxt
 
@@ -100,8 +101,12 @@ if learning:
     gamma = 6
 
     # Import and instantiate a model
-    from prosper.em.camodels.bsc_et import BSC_ET
-    model = BSC_ET(D, H, Hprime, gamma)
+    discriminative = True
+    if discriminative:
+        model = DBSC_ET(D, H, Hprime, gamma)
+    else:
+        model = BSC_ET(D, H, Hprime, gamma)
+
 
     # Configure DataLogger
     print_list = ('T', 'L', 'pi', 'sigma')
@@ -124,7 +129,9 @@ if learning:
     # anneal['pi_noise'] = [(0,0.),(0.2,0.1),(0.7,0.)]
     anneal['anneal_prior'] = False
 
-    my_data = {'y': ts}
+    training_labels = np.array(training_labels)
+    assert training_labels.shape[0]==ts.shape[0]
+    my_data = {'y': ts, 'l': training_labels}
     model_params = model.standard_init(my_data)
     print("model defined")
     em = EM(model=model, anneal=anneal)
