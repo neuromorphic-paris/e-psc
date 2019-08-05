@@ -93,7 +93,7 @@ ts_test = ts_test.reshape((ts_test.shape[0], -1))
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
     # Dimensionality of the model
-    H = 100     # let's start with 100
+    H = 10     # let's start with 100
     D = ts_size**2    # dimensionality of observed data
 
     # Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
@@ -101,7 +101,7 @@ if learning:
     gamma = 6
 
     # Import and instantiate a model
-    discriminative = True
+    discriminative = False
     if discriminative:
         model = DBSC_ET(D, H, Hprime, gamma)
     else:
