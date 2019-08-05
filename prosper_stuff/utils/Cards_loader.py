@@ -18,7 +18,7 @@ def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle=F
     number_of_batch_per_label = 17
     dataset = []
     labels = []
-    
+    filenames = []
     
     # extracting data
     for label in range(number_of_labels):
@@ -27,25 +27,30 @@ def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle=F
              data = readATIS_td(file_name, orig_at_zero = True, drop_negative_dt = True, verbose = False, events_restriction = [0, np.inf])
 
              # I won't use polarity information because is not informative for the given task
-             dataset.append([data[0].copy(), data[1].copy(), (data[2].copy()**0)-1])
+             dataset.append([data[0].copy(), data[1].copy(), data[2].copy()])
              labels.append(label)
+             filenames.append(card_sets[label]+np.str(card_set_starting_number[label]+batch))
     
     # learning dataset
     dataset_learning = []
     labels_learning = []
+    filenames_learning = []
     for label in range(number_of_labels):
         for batch in range(learning_set_length):
              dataset_learning.append(dataset[batch + label * number_of_batch_per_label])
              labels_learning.append(labels[batch + label * number_of_batch_per_label])
+             filenames_learning.append(filenames[batch + label * number_of_batch_per_label])
     
     # testing dataset
     dataset_testing = []
     labels_testing = []
+    filenames_testing = []
     for label in range(number_of_labels):
         for batch in range(testing_set_length):
             testing_batch = batch + learning_set_length
             dataset_testing.append(dataset[testing_batch + label * number_of_batch_per_label])
-            labels_testing.append(labels[testing_batch + label * number_of_batch_per_label])         
+            labels_testing.append(labels[testing_batch + label * number_of_batch_per_label])
+            filenames_testing.append(filenames[testing_batch + label * number_of_batch_per_label])         
              
     
     if shuffle:
@@ -54,13 +59,13 @@ def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle=F
         rng.seed(shuffle_seed)
         
         #shuffle the dataset and the labels with the same order
-        combined_data = list(zip(dataset_learning, labels_learning))
+        combined_data = list(zip(dataset_learning, labels_learning, filenames_learning))
         rng.shuffle(combined_data)
-        dataset_learning[:], labels_learning[:] = zip(*combined_data)
+        dataset_learning[:], labels_learning[:], filenames_learning[:] = zip(*combined_data)
         
         #shuffle the dataset and the labels with the same order
-        combined_data = list(zip(dataset_testing, labels_testing))
+        combined_data = list(zip(dataset_testing, labels_testing, filenames_testing))
         rng.shuffle(combined_data)
-        dataset_testing[:], labels_testing[:] = zip(*combined_data)
+        dataset_testing[:], labels_testing[:], filenames_testing[:] = zip(*combined_data)
 
-    return dataset_learning, labels_learning, dataset_testing, labels_testing
+    return dataset_learning, labels_learning, filenames_learning, dataset_testing, labels_testing, filenames_testing

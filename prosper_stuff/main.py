@@ -36,7 +36,7 @@ learning_set_length = 12
 testing_set_length = 5
 
 data_folder = "../datasets/pips/"
-dataset_learning, labels_learning, dataset_testing, labels_testing = Cards_loader(
+dataset_learning, labels_learning, filenames_learning, dataset_testing, labels_testing, filenames_testing = Cards_loader(
     data_folder, learning_set_length, testing_set_length)
 
 #### BUILDING THE LEARNING DATASET ####
