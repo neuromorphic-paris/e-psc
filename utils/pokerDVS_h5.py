@@ -17,11 +17,11 @@ dataset_learning, labels_learning, filenames_learning, dataset_testing, labels_t
 for i, data in enumerate(dataset_learning):
 	x = []; y = []
 	# get data
-	timestamps = dataset_learning[i][0]
-	[x.append(coordinates[0]) for coordinates in dataset_learning[i][1]]
-	[y.append(coordinates[1]) for coordinates in dataset_learning[i][1]]
-	p = dataset_learning[i][2]
-	labels = [labels_learning[i],] * len(dataset_learning[i][0])
+	timestamps = data[0]
+	[x.append(coordinates[0]) for coordinates in data[1]]
+	[y.append(coordinates[1]) for coordinates in data[1]]
+	p = data[2]
+	labels = [labels_learning[i],] * len(data[0])
 
 	# build a numpy array from the data
 	d = np.column_stack([timestamps, x, y, p, labels])
@@ -30,11 +30,11 @@ for i, data in enumerate(dataset_learning):
 for i, data in enumerate(dataset_testing):
 	x = []; y = []
 	# get data
-	timestamps = dataset_testing[i][0]
-	[x.append(coordinates[0]) for coordinates in dataset_testing[i][1]]
-	[y.append(coordinates[1]) for coordinates in dataset_testing[i][1]]
-	p = dataset_testing[i][2]
-	labels = [labels_testing[i],] * len(dataset_testing[i][0])
+	timestamps = data[0]
+	[x.append(coordinates[0]) for coordinates in data[1]]
+	[y.append(coordinates[1]) for coordinates in data[1]]
+	p = data[2]
+	labels = [labels_testing[i],] * len(data[0])
 
 	# build a numpy array from the data
 	d = np.column_stack([timestamps, x, y, p, labels])
