@@ -101,7 +101,7 @@ if learning:
     gamma = 6
 
     # Import and instantiate a model
-    discriminative = True
+    discriminative = False
     if discriminative:
         model = DBSC_ET(D, H, Hprime, gamma)
     else:

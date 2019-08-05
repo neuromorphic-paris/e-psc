@@ -61,7 +61,7 @@ def Time_Surface_all(xdim, ydim, timestamp, timecoeff, dataset, num_polarities, 
 
     return tsurface
 
-## Time_Surface_event: function that computes the Time_surface around a single event
+## Time_Surface_event: function that computes the Time_surface around a single event with an exponential kernel for the decay
 # =============================================================================
 # ydim,xdim : dimensions of the timesurface
 # event : single event defined as [timestamp, [x, y]]. It is the reference even 
@@ -116,7 +116,7 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
 
     return tsurface
 
-## Time_Surface_event2: function that computes the Time_surface around a single event
+## Time_Surface_event2: function that computes the Time_surface around a single event with a gaussian kernel for the decay
 # =============================================================================
 # ydim,xdim : dimensions of the timesurface
 # event : single event defined as [timestamp, [x, y]]. It is the reference even 
