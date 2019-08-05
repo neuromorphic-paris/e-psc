@@ -41,7 +41,7 @@ testing_set_length = 5
 dtr = None
 dte = None
 if comm.rank == 0:
-    fh = tb.open_file("../dataset/pokerDVS.h5")
+    fh = tb.open_file("../datasets/pokerDVS.h5")
     dtr = [d for d in fh.root.train]
     dte = [d for d in fh.root.test]
     nprocs = comm.size
