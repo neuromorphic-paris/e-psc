@@ -62,6 +62,7 @@ ts = np.zeros((number_of_samples, ts_size, ts_size))
 
 idx = 0
 train_labels = []
+train_rec_sizes = []
 for recording in range(len(dtr)):
     for k in range(dtr[recording].shape[0]):
         single_event = [dtr[recording][k, 0], [dtr[recording][k, 1],
@@ -76,6 +77,7 @@ for recording in range(len(dtr)):
         ts[idx] = time_surface
         train_labels.append(dtr[recording][k, -1])
         idx += 1
+    train_rec_sizes.append(dtr[recording].shape[0])
 ts = ts.reshape((ts.shape[0], -1))
 
 number_of_samples = sum(sizes_of_test_samples)
@@ -83,6 +85,7 @@ ts_test = np.zeros((number_of_samples, ts_size, ts_size))
 
 idx = 0
 test_labels = []
+test_rec_sizes = []
 for recording in range(len(dte)):
     for k in range(dte[recording].shape[0]):
         single_event = [dte[recording][k, 0], [dte[recording][k, 1],
@@ -97,6 +100,7 @@ for recording in range(len(dte)):
         ts_test[idx] = time_surface
         test_labels.append(dte[recording][k, -1])
         idx += 1
+    test_rec_sizes.append(dte[recording].shape[0])
 ts_test = ts_test.reshape((ts_test.shape[0], -1))
 
 #### RUNNING THE SPARSE CODING ALGORITHM ####
@@ -160,8 +164,8 @@ if classification:
 
     train_features = []
     start = 0
-    for i in range(len(sizes_of_train_samples)):
-        stop = start + sizes_of_train_samples[i]
+    for i in range(len(train_rec_sizes)):
+        stop = start + train_rec_sizes[i]
         train_features.append(res_train['s'][start:stop, 0, :].mean(0))
         start = stop
 
@@ -172,17 +176,19 @@ if classification:
 
     test_features = []
     start = 0
-    for i in range(len(sizes_of_test_samples)):
-        stop = start + sizes_of_test_samples[i]
+    for i in range(len(test_rec_sizes)):
+        stop = start + test_rec_sizes[i]
         test_features.append(res_test['s'][start:stop, 0, :].mean(0))
         start = stop
     test_features = np.array(test_features)
 
-    train_features_labels = comm.gather(zip(train_features, train_labels))
-    test_features_labels = comm.gather(zip(test_features, test_labels))
+    train_features_labels = comm.gather((train_features, train_labels))
+    test_features_labels = comm.gather((test_features, test_labels))
     if comm.rank == 0:
-        train_features, train_labels = *train_features_labels
-        test_features, test_labels = *test_features_labels
+        train_features = np.concatenate([f[0] for f in train_features_labels])
+        train_labels = np.concatenate([f[1] for f in train_features_labels])
+        test_features = np.concatenate([f[0] for f in test_features_labels])
+        test_labels = np.concatenate([f[1] for f in test_features_labels])
 
         from sklearn.linear_model import LogisticRegression
         from sklearn import metrics
