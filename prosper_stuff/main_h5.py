@@ -52,8 +52,9 @@ if comm.rank == 0:
 
     sizes_of_train_samples = [len(dtr[j][0])
                               for j in range(len(dtr))]
-    sizes_of_test_samples = [len(dtr[j][0])
-                             for j in range(len(dtr))]
+
+    sizes_of_test_samples = [len(dte[j][0])
+                             for j in range(len(dte))]
 dtr = comm.scatter(to_scatter_train)
 dte = comm.scatter(to_scatter_test)
 
@@ -71,6 +72,7 @@ for recording in range(len(dtr)):
         dataset = [dtr[recording][:, 0].astype(np.int),
                    dtr[recording][:, 1:3].astype(np.int),
                    dtr[recording][:, 3].astype(np.int)]
+
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
@@ -91,10 +93,12 @@ test_labels = []
 test_rec_sizes = []
 for recording in range(len(dte)):
     for k in range(dte[recording].shape[0]):
-        single_event = [dte[recording][k, 0], dtr[recording][k, 1:3]]
-        dataset = [dtr[recording][:, 0],
-                   dtr[recording][:, 1:3],
-                   dtr[recording][:, 3]]
+        single_event = [dte[recording][k, 0].astype(np.int),
+                        dte[recording][k, 1:3].astype(np.int)]
+        dataset = [dte[recording][:, 0].astype(np.int),
+                   dte[recording][:, 1:3].astype(np.int),
+                   dte[recording][:, 3].astype(np.int)]
+
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
