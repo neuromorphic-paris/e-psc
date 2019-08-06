@@ -46,14 +46,15 @@ if comm.rank == 0:
     fh = tb.open_file("../datasets/pokerDVS.h5")
     dtr = [d.read() for d in fh.root.train]
     dte = [d.read() for d in fh.root.test]
+    # print(dte)
     nprocs = comm.size
     to_scatter_train = [dtr[i::nprocs] for i in range(nprocs)]
     to_scatter_test = [dte[i::nprocs] for i in range(nprocs)]
 
     sizes_of_train_samples = [len(dtr[j][0])
                               for j in range(len(dtr))]
-    sizes_of_test_samples = [len(dtr[j][0])
-                             for j in range(len(dtr))]
+    sizes_of_test_samples = [len(dte[j][0])
+                             for j in range(len(dte))]
 dtr = comm.scatter(to_scatter_train)
 dte = comm.scatter(to_scatter_test)
 
@@ -91,10 +92,10 @@ test_labels = []
 test_rec_sizes = []
 for recording in range(len(dte)):
     for k in range(dte[recording].shape[0]):
-        single_event = [dte[recording][k, 0], dtr[recording][k, 1:3]]
-        dataset = [dtr[recording][:, 0],
-                   dtr[recording][:, 1:3],
-                   dtr[recording][:, 3]]
+        single_event = [dte[recording][k, 0], dte[recording][k, 1:3]]
+        dataset = [dte[recording][:, 0],
+                   dte[recording][:, 1:3],
+                   dte[recording][:, 3]]
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
