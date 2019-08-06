@@ -130,8 +130,8 @@ if learning:
     D = ts_size**2    # dimensionality of observed data
 
     # Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
-    Hprime = 8
-    gamma = 6
+    Hprime = 4
+    gamma = 4
 
     # Import and instantiate a model
     discriminative = False
