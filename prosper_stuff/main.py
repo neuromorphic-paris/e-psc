@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import truncnorm
 
 from utils.Cards_loader import Cards_loader
-from utils.Time_Surface_generators import Time_Surface_event
+from utils.Time_Surface_generators import Time_Surface_event, Time_Surface_event2
 
 from prosper.em import EM
 from prosper.em.annealing import LinearAnnealing
@@ -12,7 +12,6 @@ from prosper.em.camodels.bsc_et import BSC_ET
 from prosper.em.camodels.dbsc_et import DBSC_ET
 from prosper.utils import create_output_path
 from prosper.utils.datalog import dlog, StoreToH5, TextPrinter, StoreToTxt
-
 
 import os
 
@@ -23,7 +22,7 @@ output_path = create_output_path()
 
 learning = True  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
-
+gaussian_ts = True # choose between exponential time surfaces and gaussian time surfaces
 ts_size = 13  # size of the time surfaces
 # size of the pip cards (square so dimension D = rec_size * rec_size)
 rec_size = 35
@@ -54,24 +53,27 @@ for recording in range(len(dataset_learning)):
         single_event = [dataset_learning[recording]
                         [0][k], dataset_learning[recording][1][k]]
 
-        # exponential time surfaces
-        time_surface = Time_Surface_event(xdim=ts_size,
-                                          ydim=ts_size,
-                                          event=single_event,
-                                          mu=tau,
-                                          std_dev=1,
-                                          dataset=dataset_learning[recording],
-                                          num_polarities=polarities,
-                                          verbose=True)
+        if gaussian_ts:
+          # gaussian time surfaces
+          time_surface = Time_Surface_event2(xdim=ts_size,
+                                            ydim=ts_size,
+                                            event=single_event,
+                                            sigma=100,
+                                            dataset=dataset_learning[recording],
+                                            num_polarities=polarities,
+                                            minv=0.1,
+                                            verbose=False)
+        else:
+          # exponential time surfaces
+          time_surface = Time_Surface_event(xdim=ts_size,
+                                            ydim=ts_size,
+                                            event=single_event,
+                                            timecoeff=tau,
+                                            dataset=dataset_learning[recording],
+                                            num_polarities=polarities,
+                                            minv=0.1,
+                                            verbose=False)
 
-        # gaussian time surfaces
-        time_surface = Time_Surface_event(xdim=ts_size,
-                                          ydim=ts_size,
-                                          event=single_event,
-                                          timecoeff=tau,
-                                          dataset=dataset_learning[recording],
-                                          num_polarities=polarities,
-                                          verbose=True)
         ts[idx] = time_surface
         training_labels.append(recording)
         idx += 1
