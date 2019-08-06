@@ -20,3 +20,9 @@ output/main\.py\.2019-07-22\+13:55/results\.txt
 output/main\.py\.2019-07-22\+15:12/results\.txt
 
 output/main\.py\.2019-07-22\+15:43\+1/results\.txt
+
+prosper_stuff/src/prosper/
+
+prosper_stuff/utils/__pycache__/__init__\.cpython-37\.pyc
+
+*.pyc

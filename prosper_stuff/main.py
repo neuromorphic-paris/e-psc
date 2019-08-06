@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import truncnorm
 
 from utils.Cards_loader import Cards_loader
-from utils.Time_Surface_generators import Time_Surface_all, Time_Surface_event
+from utils.Time_Surface_generators import Time_Surface_event
 
 from prosper.em import EM
 from prosper.em.annealing import LinearAnnealing
@@ -53,13 +53,25 @@ for recording in range(len(dataset_learning)):
     for k in range(len(dataset_learning[recording][0])):
         single_event = [dataset_learning[recording]
                         [0][k], dataset_learning[recording][1][k]]
+
+        # exponential time surfaces
+        time_surface = Time_Surface_event(xdim=ts_size,
+                                          ydim=ts_size,
+                                          event=single_event,
+                                          mu=tau,
+                                          std_dev=1,
+                                          dataset=dataset_learning[recording],
+                                          num_polarities=polarities,
+                                          verbose=True)
+
+        # gaussian time surfaces
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
                                           timecoeff=tau,
                                           dataset=dataset_learning[recording],
                                           num_polarities=polarities,
-                                          verbose=False)
+                                          verbose=True)
         ts[idx] = time_surface
         training_labels.append(recording)
         idx += 1
