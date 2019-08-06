@@ -38,4 +38,4 @@ for i, data in enumerate(dataset_testing):
 
 	# build a numpy array from the data
 	d = np.column_stack([timestamps, x, y, p, labels])
-	train.create_dataset(filenames_testing[i], data=d, dtype='f')
+	test.create_dataset(filenames_testing[i], data=d, dtype='f')
