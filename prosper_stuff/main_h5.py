@@ -15,14 +15,17 @@ from prosper.utils.datalog import dlog, StoreToH5, TextPrinter, StoreToTxt
 import tables as tb
 from mpi4py import MPI
 
-import os
+import os, sys
 
 comm = MPI.COMM_WORLD
 
-np.set_printoptions(threshold=sys.maxsize)
+nprocs = comm.size
+print("running {} parallel processes".format(nprocs))
+
+# np.set_printoptions(threshold=sys.maxsize)
 output_path = create_output_path()
 
-#### PARAMETERS ####
+# PARAMETERS ####
 
 learning = True  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
@@ -34,31 +37,28 @@ tau = 5000  # time constant for the construction of time surfaces
 # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 polarities = 1
 
-#### IMPORTING DATASET ####
+# IMPORTING DATASET ####
 learning_set_length = 12
 testing_set_length = 5
 
 dtr = None
 dte = None
-to_scatter_train=None
-to_scatter_test =None
+print("rank: ", comm.rank)
+
+to_scatter_train = None
+to_scatter_test = None
 if comm.rank == 0:
     fh = tb.open_file("../datasets/pokerDVS.h5")
     dtr = [d.read() for d in fh.root.train]
     dte = [d.read() for d in fh.root.test]
-    # print(dte)
-    nprocs = comm.size
+
     to_scatter_train = [dtr[i::nprocs] for i in range(nprocs)]
     to_scatter_test = [dte[i::nprocs] for i in range(nprocs)]
 
-    sizes_of_train_samples = [len(dtr[j][0])
-                              for j in range(len(dtr))]
-
-    sizes_of_test_samples = [len(dte[j][0])
-                             for j in range(len(dte))]
 dtr = comm.scatter(to_scatter_train)
 dte = comm.scatter(to_scatter_test)
-
+print("rank: ", comm.rank, len(dtr), len(dte))
+sys.stdout.flush()
 # number_of_samples = sum(sizes_of_train_samples)
 
 
@@ -88,10 +88,10 @@ for recording in range(len(dtr)):
 ts = np.array(ts)
 ts = ts.reshape((ts.shape[0], -1))
 train_labels = np.array(train_labels)
-ts_res = ts.shape[0] % comm.size
-ts = ts[:-ts_res]
-train_labels = train_labels[:-ts_res]
-print(len(train_labels))
+# ts_res = ts.shape[0] % comm.size
+# ts = ts[:-ts_res]
+# train_labels = train_labels[:-ts_res]
+# print(len(train_labels))
 
 ts_test = []
 test_labels = []
@@ -117,10 +117,12 @@ for recording in range(len(dte)):
 ts_test = np.array(ts_test)
 ts_test = ts_test.reshape((ts_test.shape[0], -1))
 test_labels = np.array(test_labels)
-ts_test_res = ts_test.shape[0] % comm.size
-ts_test = ts_test[:-ts_test_res]
-test_labels = test_labels[:-ts_test_res]
-
+# ts_test_res = ts_test.shape[0] % comm.size
+# ts_test = ts_test[:-ts_test_res]
+# test_labels = test_labels[:-ts_test_res]
+print("rank: ", comm.rank, ts.shape, train_labels.shape)
+sys.stdout.flush()
+comm.barrier()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
     # Dimensionality of the model
