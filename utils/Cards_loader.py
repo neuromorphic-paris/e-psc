@@ -27,7 +27,7 @@ def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle=F
              data = readATIS_td(file_name, orig_at_zero = True, drop_negative_dt = True, verbose = False, events_restriction = [0, np.inf])
 
              # I won't use polarity information because is not informative for the given task
-             dataset.append([data[0].copy(), data[1].copy(), data[2].copy()])
+             dataset.append([data[0].copy(), data[1].copy(), (data[2].copy())-1])
              labels.append(label)
              filenames.append(card_sets[label]+np.str(card_set_starting_number[label]+batch))
     
