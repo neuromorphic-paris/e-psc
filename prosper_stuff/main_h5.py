@@ -53,6 +53,7 @@ if comm.rank == 0:
 
     sizes_of_train_samples = [len(dtr[j][0])
                               for j in range(len(dtr))]
+
     sizes_of_test_samples = [len(dte[j][0])
                              for j in range(len(dte))]
 dtr = comm.scatter(to_scatter_train)
@@ -72,6 +73,7 @@ for recording in range(len(dtr)):
         dataset = [dtr[recording][:, 0].astype(np.int),
                    dtr[recording][:, 1:3].astype(np.int),
                    dtr[recording][:, 3].astype(np.int)]
+
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
@@ -80,22 +82,28 @@ for recording in range(len(dtr)):
                                           num_polarities=polarities,
                                           verbose=False)
         ts.append(time_surface)
-        train_labels.append(dtr[recording][k, -1])
+        train_labels.append(int(dtr[recording][k, -1]))
         # idx += 1
     train_rec_sizes.append(dtr[recording].shape[0])
 ts = np.array(ts)
 ts = ts.reshape((ts.shape[0], -1))
-
+train_labels = np.array(train_labels)
+ts_res = ts.shape[0] % comm.size
+ts = ts[:-ts_res]
+train_labels = train_labels[:-ts_res]
+print(len(train_labels))
 
 ts_test = []
 test_labels = []
 test_rec_sizes = []
 for recording in range(len(dte)):
     for k in range(dte[recording].shape[0]):
-        single_event = [dte[recording][k, 0], dte[recording][k, 1:3]]
-        dataset = [dte[recording][:, 0],
-                   dte[recording][:, 1:3],
-                   dte[recording][:, 3]]
+
+        single_event = [dte[recording][k, 0].astype(np.int),
+                        dte[recording][k, 1:3].astype(np.int)]
+        dataset = [dte[recording][:, 0].astype(np.int),
+                   dte[recording][:, 1:3].astype(np.int),
+                   dte[recording][:, 3].astype(np.int)]
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
@@ -104,10 +112,14 @@ for recording in range(len(dte)):
                                           num_polarities=polarities,
                                           verbose=False)
         ts_test.append(time_surface)
-        test_labels.append(dte[recording][k, -1])
+        test_labels.append(int(dte[recording][k, -1]))
     test_rec_sizes.append(dte[recording].shape[0])
 ts_test = np.array(ts_test)
 ts_test = ts_test.reshape((ts_test.shape[0], -1))
+test_labels = np.array(test_labels)
+ts_test_res = ts_test.shape[0] % comm.size
+ts_test = ts_test[:-ts_test_res]
+test_labels = test_labels[:-ts_test_res]
 
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
@@ -120,7 +132,7 @@ if learning:
     gamma = 6
 
     # Import and instantiate a model
-    discriminative = True
+    discriminative = False
     if discriminative:
         model = DBSC_ET(D, H, Hprime, gamma)
     else:
@@ -138,7 +150,7 @@ if learning:
 
     # Choose annealing schedule
     from prosper.em.annealing import LinearAnnealing
-    anneal = LinearAnnealing(120)  # decrease
+    anneal = LinearAnnealing(1)  # decrease
     anneal['T'] = [(0, 5.), (.8, 1.)]
     anneal['Ncut_factor'] = [(0, 0.), (0.5, 0.), (0.6, 1.)]
     # anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
@@ -147,7 +159,6 @@ if learning:
     # anneal['pi_noise'] = [(0,0.),(0.2,0.1),(0.7,0.)]
     anneal['anneal_prior'] = False
 
-    train_labels = np.array(train_labels)
     assert train_labels.shape[0] == ts.shape[0]
     my_data = {'y': ts, 'l': train_labels}
     model_params = model.standard_init(my_data)
@@ -169,24 +180,34 @@ if classification:
     res_train = model.inference(anneal, em.lparams, my_train_data)
 
     train_features = []
+    train_labels2 = []
     start = 0
     for i in range(len(train_rec_sizes)):
         stop = start + train_rec_sizes[i]
         train_features.append(res_train['s'][start:stop, 0, :].mean(0))
+        this_l = train_labels[start:stop]
+        assert (this_l == this_l[0]).all()
+        train_labels2.append(this_l[0])
         start = stop
 
     train_features = np.array(train_features)
+    train_labels = np.array(train_labels2)
 
     my_test_data = {'y': ts_test}
     res_test = model.inference(anneal, em.lparams, my_test_data)
 
     test_features = []
+    test_labels2 = []
     start = 0
     for i in range(len(test_rec_sizes)):
         stop = start + test_rec_sizes[i]
         test_features.append(res_test['s'][start:stop, 0, :].mean(0))
+        this_l = test_labels[start:stop]
+        assert (this_l == this_l[0]).all()
+        test_labels2.append(this_l[0])
         start = stop
     test_features = np.array(test_features)
+    test_labels = np.array(test_labels2)
 
     train_features_labels = comm.gather((train_features, train_labels))
     test_features_labels = comm.gather((test_features, test_labels))
