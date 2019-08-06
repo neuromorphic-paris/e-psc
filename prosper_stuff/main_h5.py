@@ -40,10 +40,12 @@ testing_set_length = 5
 
 dtr = None
 dte = None
+to_scatter_train=None
+to_scatter_test =None
 if comm.rank == 0:
     fh = tb.open_file("../datasets/pokerDVS.h5")
-    dtr = [d for d in fh.root.train]
-    dte = [d for d in fh.root.test]
+    dtr = [d.read() for d in fh.root.train]
+    dte = [d.read() for d in fh.root.test]
     nprocs = comm.size
     to_scatter_train = [dtr[i::nprocs] for i in range(nprocs)]
     to_scatter_test = [dte[i::nprocs] for i in range(nprocs)]
@@ -55,52 +57,55 @@ if comm.rank == 0:
 dtr = comm.scatter(to_scatter_train)
 dte = comm.scatter(to_scatter_test)
 
-number_of_samples = sum(sizes_of_train_samples)
+# number_of_samples = sum(sizes_of_train_samples)
 
-number_of_features = ts_size**2
-ts = np.zeros((number_of_samples, ts_size, ts_size))
 
-idx = 0
+# idx = 0
+ts = []
 train_labels = []
 train_rec_sizes = []
 for recording in range(len(dtr)):
     for k in range(dtr[recording].shape[0]):
-        single_event = [dtr[recording][k, 0], [dtr[recording][k, 1],
-                                               dtr[recording][k, 2]]]
+        single_event = [dtr[recording][k, 0].astype(np.int),
+                        dtr[recording][k, 1:3].astype(np.int)]
+        dataset = [dtr[recording][:, 0].astype(np.int),
+                   dtr[recording][:, 1:3].astype(np.int),
+                   dtr[recording][:, 3].astype(np.int)]
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
                                           timecoeff=tau,
-                                          dataset=dtr[recording],
+                                          dataset=dataset,
                                           num_polarities=polarities,
                                           verbose=False)
-        ts[idx] = time_surface
+        ts.append(time_surface)
         train_labels.append(dtr[recording][k, -1])
-        idx += 1
+        # idx += 1
     train_rec_sizes.append(dtr[recording].shape[0])
+ts = np.array(ts)
 ts = ts.reshape((ts.shape[0], -1))
 
-number_of_samples = sum(sizes_of_test_samples)
-ts_test = np.zeros((number_of_samples, ts_size, ts_size))
 
-idx = 0
+ts_test = []
 test_labels = []
 test_rec_sizes = []
 for recording in range(len(dte)):
     for k in range(dte[recording].shape[0]):
-        single_event = [dte[recording][k, 0], [dte[recording][k, 1],
-                                               dte[recording][k, 2]]]
+        single_event = [dte[recording][k, 0], dtr[recording][k, 1:3]]
+        dataset = [dtr[recording][:, 0],
+                   dtr[recording][:, 1:3],
+                   dtr[recording][:, 3]]
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
                                           timecoeff=tau,
-                                          dataset=dte[recording],
+                                          dataset=dataset,
                                           num_polarities=polarities,
                                           verbose=False)
-        ts_test[idx] = time_surface
+        ts_test.append(time_surface)
         test_labels.append(dte[recording][k, -1])
-        idx += 1
     test_rec_sizes.append(dte[recording].shape[0])
+ts_test = np.array(ts_test)
 ts_test = ts_test.reshape((ts_test.shape[0], -1))
 
 #### RUNNING THE SPARSE CODING ALGORITHM ####
