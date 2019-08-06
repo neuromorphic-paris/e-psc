@@ -126,7 +126,7 @@ comm.barrier()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
     # Dimensionality of the model
-    H = 10     # let's start with 100
+    H = 4     # let's start with 100
     D = ts_size**2    # dimensionality of observed data
 
     # Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
@@ -152,7 +152,7 @@ if learning:
 
     # Choose annealing schedule
     from prosper.em.annealing import LinearAnnealing
-    anneal = LinearAnnealing(1)  # decrease
+    anneal = LinearAnnealing(120)  # decrease
     anneal['T'] = [(0, 5.), (.8, 1.)]
     anneal['Ncut_factor'] = [(0, 0.), (0.5, 0.), (0.6, 1.)]
     # anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
