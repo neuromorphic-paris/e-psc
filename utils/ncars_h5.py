@@ -3,7 +3,7 @@ import h5py
 import numpy as np
 from readwriteatis_kaerdat import readATIS_td
 
-f = h5py.File('ncars.h5', 'w')
+f = h5py.File('ncars', 'w')
 train = f.create_group("train")
 test = f.create_group("test")
 
@@ -26,12 +26,14 @@ for file_name in train_files:
     file_class = file_name.split('/')
     if file_class[-2] == 'cars':
         labels = [1,] * len(data[0])
+        name = file_class[-1].split('.')[0]+'_car'
     elif file_class[-2] == 'background':
         labels = [0,] * len(data[0])
+        name = file_class[-1].split('.')[0]+'_bgd'
 
     # create dataset
     d = np.column_stack([timestamps, x, y, p, labels])
-    train.create_dataset(file_class[-1], data=d, dtype='f')
+    train.create_dataset(name, data=d, dtype='f')
 
 for file_name in test_files:
     # read data
@@ -47,9 +49,11 @@ for file_name in test_files:
     file_class = file_name.split('/')
     if file_class[-2] == 'cars':
         labels = [1,] * len(data[0])
+        name = file_class[-1].split('.')[0]+'_car'
     elif file_class[-2] == 'background':
         labels = [0,] * len(data[0])
+        name = file_class[-1].split('.')[0]+'_bgd'
 
     # create dataset
     d = np.column_stack([timestamps, x, y, p, labels])
-    test.create_dataset(file_class[-1], data=d, dtype='f')
+    test.create_dataset(name, data=d, dtype='f')

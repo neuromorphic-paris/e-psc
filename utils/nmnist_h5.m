@@ -4,7 +4,7 @@ close
 
 %%% PARAMETERS %%%
 first_saccade_only = true;
-percentage_of_data = 10;
+percentage_of_data = 100;
 
 if exist('nmnist.h5', 'file') == 2
   delete('nmnist.h5');
@@ -61,7 +61,7 @@ function TD = Read_Ndataset(filename)
 end
 
 % temporally crop a dataset
-function [output] = temporalCrop(~, filename, ts1, ts2)
+function [output] = temporalCrop(filename, ts1, ts2)
     % only keeps events that have timestamps within [ts1, ts2]
     mask = and(filename.ts >= ts1, filename.ts <= ts2);
     fields = fieldnames(filename);
