@@ -1,4 +1,4 @@
--e git+git@github.com:gexarcha/prosper.git#egg=prosper
+#-e git+git@github.com:gexarcha/prosper.git#egg=prosper
 matplotlib
 seaborn
 scipy
