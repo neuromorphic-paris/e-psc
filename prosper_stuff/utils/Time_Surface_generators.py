@@ -11,8 +11,9 @@ please note that these functions expect the dataset to be ordered from the
 lower timestamp to the highest
 """
 import numpy as np
-#import matplotlib.pyplot as plt
-#import seaborn as sns
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
 import pandas as pd
 from scipy.stats import truncnorm
 from bisect import bisect_left, bisect_right
@@ -55,9 +56,12 @@ def Time_Surface_all(xdim, ydim, timestamp, timecoeff, dataset, num_polarities, 
         if tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]==0:
             tsurface[tmpdata[1][i][1],tmpdata[1][i][0]+xdim*tmpdata[2][i]]=tsurface_array[i]
     #plot graphs if verbose is set "True"
-    #if (verbose):
-    #    sns.heatmap(tsurface)
-    #    plt.show()
+    if (verbose):
+        try:
+            sns.heatmap(tsurface)
+            plt.show()
+        finally:
+            pass
 
     return tsurface
 
@@ -112,10 +116,12 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
     for i in range(len(tsurface_array)):
         tsurface[tmpdata[1][i][1]+offs[1],tmpdata[1][i][0]+offs[0]+xdim*tmpdata[2][i]]=tsurface_array[i]
     #plot graphs if verbose is set "True"
-    #if (verbose):
-    #    sns.heatmap(tsurface)
-    #    plt.show()
-
+    if (verbose)::
+        try:
+            sns.heatmap(tsurface)
+            plt.show()
+        finally:
+            pass
     return tsurface
 
 ## Time_Surface_event2: function that computes the Time_surface around a single event with a gaussian kernel for the decay
@@ -170,8 +176,12 @@ def Time_Surface_event2(xdim, ydim, event, sigma, dataset, num_polarities, minv=
     for i in range(len(tsurface_array)):
         tsurface[tmpdata[1][i][1]+offs[1],tmpdata[1][i][0]+offs[0]+xdim*tmpdata[2][i]]=tsurface_array[i]
     #plot graphs if verbose is set "True"
-    #if (verbose):
-    #    sns.heatmap(tsurface)
-    #    plt.show()
+    if (verbose):
+        try:
+            sns.heatmap(tsurface)
+            plt.show()
+        finally:
+            pass
+        
 
     return tsurface
