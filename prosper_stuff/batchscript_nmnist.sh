@@ -21,7 +21,7 @@ module load python/conda-root
 #conda init zsh
 #conda init bash
 #module load python/3.6.4-ompi
-source activate psc2
+conda activate psc2
 #module load openmpi/gcc/3.0.0
 #module load impi/4.1.3.048/32/gcc 
 #module load impi/4.1.3.048/64/gcc 
