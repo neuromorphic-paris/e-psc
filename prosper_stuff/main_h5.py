@@ -38,9 +38,6 @@ tau = 5000  # time constant for the construction of time surfaces
 polarities = 1
 
 # IMPORTING DATASET ####
-learning_set_length = 12
-testing_set_length = 5
-
 dtr = None
 dte = None
 print("rank: ", comm.rank)

@@ -11,13 +11,15 @@ please note that these functions expect the dataset to be ordered from the
 lower timestamp to the highest
 """
 import numpy as np
-try:
-    import matplotlib.pyplot as plt
-    import seaborn as sns
 import pandas as pd
 from scipy.stats import truncnorm
 from bisect import bisect_left, bisect_right
 
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+finally:
+    pass
 
 ## Time_Surface_all: function that computes the Time_surface of an entire dataset,
 #  starting from a selected timestamp.
@@ -116,7 +118,7 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
     for i in range(len(tsurface_array)):
         tsurface[tmpdata[1][i][1]+offs[1],tmpdata[1][i][0]+offs[0]+xdim*tmpdata[2][i]]=tsurface_array[i]
     #plot graphs if verbose is set "True"
-    if (verbose)::
+    if (verbose):
         try:
             sns.heatmap(tsurface)
             plt.show()
