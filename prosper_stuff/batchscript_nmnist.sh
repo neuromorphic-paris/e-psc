@@ -2,9 +2,9 @@
 #SBATCH --job-name="nmnist"
 #SBATCH --output=nmnist-%j.out
 #SBATCH --error=nmnist-%j.err
-#SBATCH --ntasks=64
+#SBATCH --ntasks=128
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=8000M
+#SBATCH --mem-per-cpu=80M
 # mail alert at start, end and abortion of execution
 #SBATCH --mail-user=georgios.exarchakis@uni-oldenburg.de
 #SBATCH --mail-type=ALL
@@ -17,11 +17,6 @@
 ###SBATCH --export=ALL
 #
 ### Keep in mind to load your desired modules here. Otherwise they won't be available in your Job. Read more about modules at Environment modules
-module load python/conda-root
-#conda init zsh
-#conda init bash
-#module load python/3.6.4-ompi
-conda activate psc2
 #module load openmpi/gcc/3.0.0
 #module load impi/4.1.3.048/32/gcc 
 #module load impi/4.1.3.048/64/gcc 
@@ -30,6 +25,11 @@ conda activate psc2
 #module load impi/5.1.3.210/64/intel 
 #module load impi/5.1.3.210/64/gcc
 module load impi
+module load python/conda-root
+conda init zsh
+conda init bash
+#module load python/3.6.4-ompi
+conda activate psc2
 #
 ##Here should be the command you want to execute. For example :
 echo `which python`
