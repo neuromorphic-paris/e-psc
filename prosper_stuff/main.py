@@ -22,13 +22,10 @@ output_path = create_output_path()
 
 learning = True  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
-gaussian_ts = True # choose between exponential time surfaces and gaussian time surfaces
+gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
 ts_size = 13  # size of the time surfaces
-# size of the pip cards (square so dimension D = rec_size * rec_size)
-rec_size = 35
 tau = 5000  # time constant for the construction of time surfaces
-# number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
-polarities = 1
+polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
 #### IMPORTING DATASET ####
 learning_set_length = 12

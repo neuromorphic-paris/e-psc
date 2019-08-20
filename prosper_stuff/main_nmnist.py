@@ -30,17 +30,9 @@ output_path = create_output_path()
 
 learning = True  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
-
 ts_size = 13  # size of the time surfaces
-# size of the pip cards (square so dimension D = rec_size * rec_size)
-rec_size = 35
 tau = 5000  # time constant for the construction of time surfaces
-# number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
-polarities = 1
-
-# IMPORTING DATASET ####
-learning_set_length = 12
-testing_set_length = 5
+polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
 dtr = None
 dte = None
@@ -49,8 +41,7 @@ dte = None
 to_scatter_train = None
 to_scatter_test = None
 if comm.rank == 0:
-    fh = tb.open_file("../datasets/nmnist_one_saccade.h5")
-    #fh = tb.open_file("../datasets/nmnist.h5")
+    fh = tb.open_file("../datasets/nmnist.h5")
     dtr = [d.read().astype(np.int32) for d in fh.root.train]
     dte = [d.read().astype(np.int32) for d in fh.root.test]
 
@@ -75,7 +66,7 @@ for recording in range(len(dtr)):
                         dtr[recording][k, 1:3].astype(np.int)]
         dataset = [dtr[recording][:, 0].astype(np.int),
                    dtr[recording][:, 1:3].astype(np.int),
-                   dtr[recording][:, 3].astype(np.int)]
+                   dtr[recording][:, 3].astype(np.int)-1]
 
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
@@ -106,7 +97,7 @@ for recording in range(len(dte)):
                         dte[recording][k, 1:3].astype(np.int)]
         dataset = [dte[recording][:, 0].astype(np.int),
                    dte[recording][:, 1:3].astype(np.int),
-                   dte[recording][:, 3].astype(np.int)]
+                   dte[recording][:, 3].astype(np.int)-1]
         time_surface = Time_Surface_event(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
