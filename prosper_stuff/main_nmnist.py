@@ -49,7 +49,8 @@ dte = None
 to_scatter_train = None
 to_scatter_test = None
 if comm.rank == 0:
-    fh = tb.open_file("../datasets/nmnist_one_saccade.h5")
+    fh = tb.open_file("../datasets/nmnist_small.h5")
+    #fh = tb.open_file("../datasets/nmnist_one_saccade.h5")
     #fh = tb.open_file("../datasets/nmnist.h5")
     dtr = [d.read().astype(np.int32) for d in fh.root.train]
     dte = [d.read().astype(np.int32) for d in fh.root.test]
