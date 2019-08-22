@@ -11,7 +11,6 @@ please note that these functions expect the dataset to be ordered from the
 lower timestamp to the highest
 """
 import numpy as np
-import pandas as pd
 from scipy.stats import truncnorm
 from bisect import bisect_left, bisect_right
 
@@ -84,11 +83,14 @@ def Time_Surface_all(xdim, ydim, timestamp, timecoeff, dataset, num_polarities, 
 # =============================================================================
 def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, minv=0.1, verbose=False):
     tmpdata = [dataset[0].copy(), dataset[1].copy(), dataset[2].copy()]
+    
     #centering the dataset around the event
     x0 = event[1][0]
     y0 = event[1][1]
+
     tmpdata[1][:,0] = tmpdata[1][:,0] - x0
     tmpdata[1][:,1] = tmpdata[1][:,1] - y0
+
     #taking only the timestamps before the reference
     timestamp = event[0]
     ind = bisect_right(tmpdata[0],timestamp)
@@ -109,7 +111,7 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
     tsurface_array = np.exp((tmpdata[0]-timestamp)/timecoeff)
 
     #now i need to build a matrix that will represents my surface, i will take
-    #only the highest value for each x and y as the other ar less informative
+    #only the highest value for each x and y as the others are less informative
     #and we want each layer be dependant on the timecoeff of the timesurface
     #Note that exp is monotone and the timestamps are ordered, thus the last
     #values of the dataset will be the lowest too
