@@ -41,8 +41,8 @@ dte = None
 to_scatter_train = None
 to_scatter_test = None
 if comm.rank == 0:
-    fh = tb.open_file("../datasets/nmnist_small.h5")
-    #fh = tb.open_file("../datasets/nmnist_one_saccade.h5")
+    #fh = tb.open_file("../datasets/nmnist_small.h5")
+    fh = tb.open_file("../datasets/nmnist_one_saccade.h5")
     #fh = tb.open_file("../datasets/nmnist.h5")
     dtr = [d.read().astype(np.int32) for d in fh.root.train]
     dte = [d.read().astype(np.int32) for d in fh.root.test]
@@ -122,12 +122,12 @@ comm.barrier()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
     # Dimensionality of the model
-    H = 1000     # let's start with 100
+    H = 500     # let's start with 100
     D = ts_size**2    # dimensionality of observed data
 
     # Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
-    Hprime = 4
-    gamma = 4
+    Hprime = 5
+    gamma = 3
 
     # Import and instantiate a model
     discriminative = False
