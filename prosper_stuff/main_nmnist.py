@@ -148,7 +148,7 @@ if learning:
 
     # Choose annealing schedule
     from prosper.em.annealing import LinearAnnealing
-    anneal = LinearAnnealing(120)  # decrease
+    anneal = LinearAnnealing(20)  # decrease
     anneal['T'] = [(0, 5.), (.8, 1.)]
     anneal['Ncut_factor'] = [(0, 0.), (0.5, 0.), (0.6, 1.)]
     # anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
