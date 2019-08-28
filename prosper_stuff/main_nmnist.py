@@ -203,6 +203,18 @@ if resume:
         model = BSC_ET(D, H, Hprime, gamma)
     model_params = {"W": W, "pi": pi, "sigma": sigma}
 
+    # Choose annealing schedule
+    from prosper.em.annealing import LinearAnnealing
+    anneal = LinearAnnealing(20)  # decrease
+    anneal['T'] = [(0, 5.), (.8, 1.)]
+    anneal['Ncut_factor'] = [(0, 0.), (0.5, 0.), (0.6, 1.)]
+    # anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
+    # anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
+    anneal['W_noise'] = [(0, np.std(ts) / 2.), (0.7, 0.)]
+    # anneal['pi_noise'] = [(0,0.),(0.2,0.1),(0.7,0.)]
+    anneal['anneal_prior'] = False
+    anneal.cur_pos=20
+
 if classification:
 
     my_train_data = {'y': ts}
