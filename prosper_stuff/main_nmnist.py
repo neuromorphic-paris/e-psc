@@ -219,7 +219,7 @@ if classification:
 
     my_train_data = {'y': ts}
     res_train = model.inference(anneal, model_params, my_train_data,
-                                Hprime_max=12, gamma_max=6)
+                                Hprime_max=5, gamma_max=5)
 
     train_features = []
     train_labels2 = []
@@ -237,7 +237,7 @@ if classification:
 
     my_test_data = {'y': ts_test}
     res_test = model.inference(anneal, model_params, my_test_data,
-                               Hprime_max=12, gamma_max=6)
+                               Hprime_max=5, gamma_max=5)
 
     test_features = []
     test_labels2 = []
