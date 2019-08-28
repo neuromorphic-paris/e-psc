@@ -23,16 +23,22 @@ nprocs = comm.size
 #print("running {} parallel processes".format(nprocs))
 print(sys.version_info)
 
-# np.set_printoptions(threshold=sys.maxsize)
-output_path = create_output_path()
+
+
 
 # PARAMETERS ####
 
-learning = True  # Decide whether to run the sparse coding algorithm
+learning = False  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
+resume  = True
 ts_size = 13  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
+
+if resume:
+    output_path = "/users/ml/xoex6879/workspace/psc/prosper_stuff/output/main_nmnist.py.d1062928/"
+else:
+    output_path = create_output_path()
 
 dtr = None
 dte = None
@@ -171,11 +177,37 @@ if learning:
     res = model.inference(anneal, em.lparams, my_test_data)
     sparse_codes = res['s'][:, 0, :]  # should be Number of samples x H
     dlog.close()
+    model_params = em.lparams
+
+if resume:
+    res_file = output_path + 'results.h5'
+    with tb.open_file(res_file) as fh:
+        W = fh.root.W[-1]
+        pi = fh.root.pi[-1]
+        sigma = fh.root.sigma[-1]
+
+    # Dimensionality of the model
+    H = 500     # let's start with 100
+    D = ts_size**2    # dimensionality of observed data
+
+    # Approximation parameters for Expectation Truncation
+    # (It has to be Hprime>=gamma)
+    Hprime = 5
+    gamma = 3
+
+    # Import and instantiate a model
+    discriminative = False
+    if discriminative:
+        model = DBSC_ET(D, H, Hprime, gamma)
+    else:
+        model = BSC_ET(D, H, Hprime, gamma)
+    model_params = {"W": W, "pi": pi, "sigma": sigma}
 
 if classification:
 
     my_train_data = {'y': ts}
-    res_train = model.inference(anneal, em.lparams, my_train_data)
+    res_train = model.inference(anneal, model_params, my_train_data,
+                                Hprime_max=12, gamma_max=6)
 
     train_features = []
     train_labels2 = []
@@ -192,7 +224,8 @@ if classification:
     train_labels = np.array(train_labels2)
 
     my_test_data = {'y': ts_test}
-    res_test = model.inference(anneal, em.lparams, my_test_data)
+    res_test = model.inference(anneal, model_params, my_test_data,
+                               Hprime_max=12, gamma_max=6)
 
     test_features = []
     test_labels2 = []
