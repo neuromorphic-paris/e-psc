@@ -28,3 +28,7 @@ prosper_stuff/utils/__pycache__/__init__\.cpython-37\.pyc
 *.pyc
 
 vc-GMM/build/
+
+vc-GMM/poker_ts_test.txt
+
+vc-GMM/poker_ts_train.txt
