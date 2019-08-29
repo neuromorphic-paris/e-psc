@@ -2,7 +2,7 @@
 #SBATCH --job-name="nmnist"
 #SBATCH --output=nmnist-%j.out
 #SBATCH --error=nmnist-%j.err
-#SBATCH --ntasks=128
+#SBATCH --ntasks=142
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=800M
 # mail alert at start, end and abortion of execution
