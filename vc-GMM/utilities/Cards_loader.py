@@ -10,7 +10,7 @@ import numpy as np
 # for reading the aedat files
 from utilities.readwriteatis_kaerdat import readATIS_td
 
-def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle=False):
+def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle_seed):
     # Dataset settings
     card_sets = ["cl_","di_","he_", "sp_"]
     card_set_starting_number = [60, 17, 77, 75]
@@ -53,19 +53,19 @@ def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle=F
             filenames_testing.append(filenames[testing_batch + label * number_of_batch_per_label])         
              
     
-    if shuffle:
-        #Preparing to shuffle
-        rng = np.random.RandomState()        
+    #Preparing to shuffle
+    rng = np.random.RandomState()
+    if(shuffle_seed!=0):         
         rng.seed(shuffle_seed)
-        
-        #shuffle the dataset and the labels with the same order
-        combined_data = list(zip(dataset_learning, labels_learning, filenames_learning))
-        rng.shuffle(combined_data)
-        dataset_learning[:], labels_learning[:], filenames_learning[:] = zip(*combined_data)
-        
-        #shuffle the dataset and the labels with the same order
-        combined_data = list(zip(dataset_testing, labels_testing, filenames_testing))
-        rng.shuffle(combined_data)
-        dataset_testing[:], labels_testing[:], filenames_testing[:] = zip(*combined_data)
+    
+    #shuffle the dataset and the labels with the same order
+    combined_data = list(zip(dataset_learning, labels_learning))
+    rng.shuffle(combined_data)
+    dataset_learning[:], labels_learning[:] = zip(*combined_data)
+    
+    #shuffle the dataset and the labels with the same order
+    combined_data = list(zip(dataset_testing, labels_testing))
+    rng.shuffle(combined_data)
+    dataset_testing[:], labels_testing[:] = zip(*combined_data)
 
     return dataset_learning, labels_learning, filenames_learning, dataset_testing, labels_testing, filenames_testing
