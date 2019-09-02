@@ -1,3 +1,14 @@
+# Dependencies
+* Cmake
+* Blaze
+
+# How to install blaze (needs CMAKE)
+
+1. get the source code from here: https://bitbucket.org/blaze-lib/blaze/src/master/
+2. sudo apt-get install libblas-dev liblapack-dev
+3. cmake -DCMAKE_INSTALL_PREFIX=/usr/local/
+4. sudo make install
+
 # About the Clustering Algorithm
 
 This project provides C++ source code for a very efficient clustering algorithm: *vc-GMM* [3]. In general, this novel algorithm can be applied to any metric data to which standard *k*-means or Gaussian Mixture Models (GMMs) are applied to. Especially for large-scale problems (very large numbers of data points, very large numbers of clusters, high dimensionality of data points) the algorithm is substantially faster than previous *k*-means versions (or GMM algorithms). Efficiency increases are also warranted for medium and small dimensionalities of the data points (i.e., small to intermediate numbers of features). For large-scale problems, the algorithm is on standard benchmarks several times and up to an order of magnitude faster than already very efficient recent *k*-means versions (while providing approximately equal or similar clustering results). "Large-scale" means hundreds of thousands of data points (or many more), hundreds of clusters (or many more), and tens to hundreds of features (or many more). The algorithm's output includes the estimated cluster centers and the estimated global cluster variance.

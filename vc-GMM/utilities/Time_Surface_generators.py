@@ -81,7 +81,7 @@ def Time_Surface_all(xdim, ydim, timestamp, timecoeff, dataset, num_polarities, 
 #
 # tsurface : matrix returned with ldim as linear dimension
 # =============================================================================
-def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, minv=0.1, verbose=False):
+def Time_Surface_exp(xdim, ydim, event, timecoeff, dataset, num_polarities, minv=0.1, verbose=False):
     tmpdata = [dataset[0].copy(), dataset[1].copy(), dataset[2].copy()]
     
     #centering the dataset around the event
@@ -143,7 +143,7 @@ def Time_Surface_event(xdim, ydim, event, timecoeff, dataset, num_polarities, mi
 
 # tsurface : matrix returned with ldim as linear dimension
 # =============================================================================
-def Time_Surface_event2(xdim, ydim, event, sigma, dataset, num_polarities, minv=0.1, verbose=False):
+def Time_Surface_gauss(xdim, ydim, event, sigma, dataset, num_polarities, minv=0.1, verbose=False):
     tmpdata = [dataset[0].copy(), dataset[1].copy(), dataset[2].copy()]
     # centering the dataset around the event
     x0 = event[1][0]
