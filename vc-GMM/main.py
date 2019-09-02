@@ -6,9 +6,9 @@ from sklearn.metrics import accuracy_score
 
 #### PARAMETERS ####
 
-create_features = True; # choose whether to import the dataset and create time surfaces or load from an existing npy file
-save_astxt = True # choose to save the features as a .txt file
-save_asnpy = True # choose to save the features as a .npy file
+create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
+save_astxt = False # choose to save the features as a .txt file
+save_asnpy = False # choose to save the features as a .npy file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
 gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
@@ -16,8 +16,8 @@ ts_size = 13  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
-logistic_regression = False # run logistic regression for feature exploration
-k_means_clustering = False; # sklearn kmeans clustering as a benchmark
+logistic_regression = True # run logistic regression for feature exploration
+k_means_clustering = True; # sklearn kmeans clustering as a benchmark
 vc_gmm_clustering = False # choose whether to run the C++ code that clusteers the dataset
 
 if create_features:
@@ -126,16 +126,25 @@ if create_features:
 
         np.save('features/poker_train_labels.npy', train_labels) # save the training features as a npy file
         np.save('features/poker_test_labels.npy', test_labels) # save the test features as a npy file
+else:
+    ts_train = np.load('features/poker_ts_train.npy')
+    train_labels = np.load('features/poker_train_labels.npy')
+
+    ts_test = np.load('features/poker_ts_test.npy')
+    test_labels = np.load('features/poker_test_labels.npy')
 
 #### RUNNING LOGISTIC REGRESSION ####
 if logistic_regression:
     from sklearn.linear_model import LogisticRegression 
 
 
-
 #### RUNNING K-MEANS CLUSTERING ####
 if k_means_clustering:
     from sklearn.cluster import KMeans
+
+    kmeans = KMeans(n_clusters=4)
+    kmeans.fit(ts_train)
+    clusters = kmeans.predict(ts_test)
 
 #### RUNNING VC-GMM CLUSTERING ####
 if vc_gmm_clustering:
