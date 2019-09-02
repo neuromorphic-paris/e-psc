@@ -237,39 +237,56 @@ if classification:
         assert (this_l == this_l[0]).all()
         train_labels2.append(this_l[0])
         start = stop
+        if (comm.rank%7)==0:
+
+            print(comm.rank , ": {}%".format(100.*(i+1)/len(train_rec_sizes)))
+            print("size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i]))
 
     train_features = np.array(train_features)
     train_labels = np.array(train_labels2)
-
-    my_test_data = {'y': ts_test}
-    res_test = model.inference(anneal, model_params, my_test_data,
-                               Hprime_max=Hprime, gamma_max=gamma)
+    
+    train_features_labels = comm.gather((train_features, train_labels))
+    if comm.rank == 0:
+        train_features = np.concatenate([f[0] for f in train_features_labels])
+        train_labels = np.concatenate([f[1] for f in train_features_labels])
+        np.savez(output_path+'/map_features_labels.npz',train_features=train_features, train_labels=train_labels)
 
     test_features = []
     test_labels2 = []
     start = 0
     for i in range(len(test_rec_sizes)):
         stop = start + test_rec_sizes[i]
-        test_features.append(res_test['s'][start:stop, 0, :].mean(0))
+
+        my_test_data = {'y': ts_test[start:stop]}
+        res_test = model.inference(anneal, model_params, my_test_data,
+                               Hprime_max=Hprime, gamma_max=gamma)
+
+        test_features.append(res_test['s'][:, 0, :].mean(0))
         this_l = test_labels[start:stop]
         assert (this_l == this_l[0]).all()
         test_labels2.append(this_l[0])
         start = stop
+        if (comm.rank%7)==0:
+
+            print("TEST: ", comm.rank , ": {}%".format(100.*(i+1)/len(test_rec_sizes)))
+            print("size {} -> {}".format(my_test_data['y'].shape[0],test_rec_sizes[i]))
     test_features = np.array(test_features)
     test_labels = np.array(test_labels2)
 
-    train_features_labels = comm.gather((train_features, train_labels))
     test_features_labels = comm.gather((test_features, test_labels))
     if comm.rank == 0:
-        train_features = np.concatenate([f[0] for f in train_features_labels])
-        train_labels = np.concatenate([f[1] for f in train_features_labels])
+        print("Start Classifying")
         test_features = np.concatenate([f[0] for f in test_features_labels])
         test_labels = np.concatenate([f[1] for f in test_features_labels])
 
+        np.savez(output_path+'/map_features_labels_all.npz',train_features=train_features, train_labels=train_labels,test_features=test_features,test_labels=test_labels)
+        
+        print("Import stuff")
         from sklearn.linear_model import LogisticRegression
         from sklearn import metrics
 
-        lreg = LogisticRegression(solver='lbfgs', multi_class='auto')
+        lreg = LogisticRegression(solver='lbfgs', multi_class='auto',verbose=1)
+        print("FIT")
         lreg.fit(train_features, train_labels)
         predicted_labels = lreg.predict(test_features)
 
