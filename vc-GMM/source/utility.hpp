@@ -18,16 +18,13 @@
 #include <vector>
 
 #include "blaze/Blaze.h"
-#include "threads.hxx"
+#include "threads.hpp"
 
 // computes the quantization error
+// x - dataset
+// s - cluster centers
 template <typename T>
-T
-quantization(
-    const blaze::DynamicMatrix<T, blaze::rowMajor>& x,  // dataset
-    const blaze::DynamicMatrix<T, blaze::rowMajor>& s,  // cluster centers
-    tp& threads
-) {
+T quantization(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
     using blaze::sqrNorm;
     using blaze::row;
 
@@ -35,8 +32,7 @@ quantization(
     size_t C = s.rows();
 
     std::vector<std::array<T, 64>> sum(threads.size());
-    threads.parallel(N, [&] (size_t n, size_t t)
-    -> void {
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
         T d2 = std::numeric_limits<T>::max();
         for (size_t c = 0; c < C; c++) {
             d2 = std::min(d2, sqrNorm(row(x, n) - row(s, c)));
@@ -54,11 +50,7 @@ quantization(
 
 // reads a blaze matrix from whitespace separated text file
 template <typename T>
-void
-loadtxt(
-    const std::string& path,
-    blaze::DynamicMatrix<T, blaze::rowMajor>& x
-) {
+void loadtxt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& x) {
     std::cout << "reading file ";
     std::cout << path;
     std::cout << "... ";
@@ -104,11 +96,7 @@ loadtxt(
 
 // writes blaze matrix as a text file
 template <typename T>
-void
-savetxt(
-    const std::string& path,
-    const blaze::DynamicMatrix<T>& x
-) {
+void savetxt(const std::string& path, const blaze::DynamicMatrix<T>& x) {
     std::ofstream ofs(path);
 
     ofs << std::scientific;

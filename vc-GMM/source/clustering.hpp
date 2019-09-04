@@ -7,65 +7,45 @@
 //
 /******************************************************************************/
 
-#include "variational.hxx"
-#include "subsample.hxx"
-#include "seeding.hxx"
-#include "threads.hxx"
-#include "utility.hxx"
+#include "variational.hpp"
+#include "subsample.hpp"
+#include "seeding.hpp"
+#include "threads.hpp"
+#include "utility.hpp"
 
 template <typename T>
 struct clustering {
-    const blaze::DynamicMatrix<T, blaze::rowMajor>& x;  // dataset
-          blaze::DynamicMatrix<T, blaze::rowMajor> c;   // coreset
-          blaze::DynamicVector<T> w;                    // weights
-          blaze::DynamicMatrix<T, blaze::rowMajor> s;   // cluster center
-    variational<T> algo;    // implements var-GMM-S and vc-GMM
+    const blaze::DynamicMatrix<T, blaze::rowMajor>& x; // dataset
+    blaze::DynamicMatrix<T, blaze::rowMajor> c;        // coreset
+    blaze::DynamicVector<T> w;                         // weights
+    blaze::DynamicMatrix<T, blaze::rowMajor> s;        // cluster center
+    variational<T> algo;                               // implements var-GMM-S and vc-GMM
     bool initial;
 
 public:
     // wrapper for var-GMM-S
-    clustering(
-        const blaze::DynamicMatrix<T, blaze::rowMajor>& x,
-        std::size_t C,
-        std::size_t chain,
-        std::size_t C_p,
-        std::size_t G,
-        bool plus1,
-        std::size_t nthreads,
-        std::size_t seed
-    )   : x(x)
-        , w(x.rows(), T(1.0))
-        , s(C, x.columns())
-        , algo(x, w, s, C_p, G, plus1, 1.0, nthreads, seed)
-        , initial(true)
-    {
+    clustering( const blaze::DynamicMatrix<T, blaze::rowMajor>& x, std::size_t C, std::size_t chain, std::size_t C_p, std::size_t G, bool plus1, std::size_t nthreads, std::size_t seed) :
+            x(x),
+            w(x.rows(), T(1.0)),
+            s(C, x.columns()),
+            algo(x, w, s, C_p, G, plus1, 1.0, nthreads, seed),
+            initial(true) {
         afkmc2(x, w, s, algo.mt[0][0], C, chain);   // AFK-MC^2 seeding
     }
 
     // wrapper for vc-GMM
-    clustering(
-        const blaze::DynamicMatrix<T, blaze::rowMajor>& x,
-        std::size_t N_core,
-        std::size_t C,
-        std::size_t chain,
-        std::size_t C_p,
-        std::size_t G,
-        bool plus1,
-        std::size_t nthreads,
-        std::size_t seed
-    )   : x(x)
-        , c(N_core, x.columns())
-        , w(N_core)
-        , s(C, x.columns())
-        , algo(c, w, s, C_p, G, plus1, 1.0, nthreads, seed)
-        , initial(true)
-    {
+    clustering(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, std::size_t N_core, std::size_t C, std::size_t chain, std::size_t C_p, std::size_t G, bool plus1, std::size_t nthreads, std::size_t seed) :
+            x(x),
+            c(N_core, x.columns()),
+            w(N_core),
+            s(C, x.columns()),
+            algo(c, w, s, C_p, G, plus1, 1.0, nthreads, seed),
+            initial(true) {
         lwcs(x, c, w, N_core, algo.mt[0][0]);       // construct lightweight coreset
         afkmc2(c, w, s, algo.mt[0][0], C, chain);   // AFK-MC^2 seeding
     }
 
-    void
-    converge(T eps) {
+    void converge(T eps) {
 
         double prv = 0.0;
         double cur = 0.0;
@@ -73,8 +53,10 @@ public:
 
         while (true) {
 
+            // E-STEP
             algo.estep();
-
+            
+            // M-STEP
             if (initial) {
                 initial = false;
                 algo.guess_variance();
@@ -103,49 +85,25 @@ public:
             prv = cur;
         }
     }
-
-    blaze::DynamicMatrix<T, blaze::rowMajor>
-    cluster_centers(void) {
+    
+    blaze::DynamicMatrix<T, blaze::rowMajor> cluster_centers(void) {
         return s;
     }
 
-    void
-    set_variance(double variance)
-    {
+    void set_variance(double variance) {
         algo.variance = variance;
         initial = false;
     }
 
-    void
-    estep()
-    {
-        algo.estep();
-    }
-
-    void
-    mstep()
-    {
-        if (initial) {
-            initial = false;
-            algo.guess_variance();
-            algo.fit();
-        } else {
-            algo.fit();
-        }
-    }
-
-    T
-    variance(void) {
+    T variance(void) {
         return algo.variance;
     }
 
-    T
-    lower_bound(void) {
+    T lower_bound(void) {
         return algo.free_energy;
     }
 
-    T
-    error(void) {
+    T error(void) {
         return quantization(x, s, algo.threads);
     }
 };

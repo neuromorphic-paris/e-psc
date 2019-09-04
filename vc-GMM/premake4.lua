@@ -1,4 +1,4 @@
-solution 'vc-GMM' 
+solution 'vc-GMM'
     configurations {'Release', 'Debug'}
     location 'build'
 
@@ -11,8 +11,8 @@ solution 'vc-GMM'
         	location 'build'
 
 			-- All files in source, third_party and applications
-        	files {'source/**.hxx',
-        		   'source/' .. name .. '.cxx'
+        	files {'source/**.hpp',
+        		     'applications/' .. name .. '.cpp'
         	}
 
 	        -- Declare the configurations

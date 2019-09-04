@@ -1,14 +1,23 @@
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
+# main.py
 
-from sklearn.metrics import accuracy_score
+# Created by Omar Oubari.
+# Email: omar.oubari@inserm.fr
+# Last Version: 04/09/2019
+
+# information:
+#     1. building the time surfaces (learning and testing set)
+#     2. running the learning set through vc-GMM to find the cluster centers
+#     3. building average histogram of activated clusters on the learning set to find the signature of each class
+#     4. classification by building histogram of the test set and comparing to the learned histograms via distance (Euclidean and Bhattacharyya)
+
+import numpy as np
+import seaborn as sn
+import matplotlib.pyplot as plt
 
 #### PARAMETERS ####
 
-create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
-save_astxt = False # choose to save the features as a .txt file
-save_asnpy = False # choose to save the features as a .npy file
+create_features = True; # choose whether to import the dataset and create time surfaces or load from an existing npy file
+save_astxt = True # choose to save the features as a .txt file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
 gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
@@ -16,16 +25,14 @@ ts_size = 13  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
-logistic_regression = True # run logistic regression for feature exploration
-k_means_clustering = True; # sklearn kmeans clustering as a benchmark
-vc_gmm_clustering = False # choose whether to run the C++ code that clusteers the dataset
+vc_gmm_clustering = True # choose whether to run the C++ code that clusters the dataset
 
 if create_features:
     from utilities.Cards_loader import Cards_loader
     from utilities.Time_Surface_generators import Time_Surface_exp, Time_Surface_gauss
 
     #### IMPORTING DATASET ####
-    learning_set_length = 12  
+    learning_set_length = 12
     testing_set_length = 5
 
     data_folder = "../datasets/pips/"
@@ -120,46 +127,30 @@ if create_features:
         np.savetxt('features/poker_train_labels.txt', train_labels, fmt='%i') # save the training labels as a text file
         np.savetxt('features/poker_test_labels.txt', test_labels, fmt='%i') # save the test labels as a text file
 
-    if save_asnpy:
-        np.save('features/poker_ts_train.npy', ts_train) # save the training features as a npy file
-        np.save('features/poker_ts_test.npy', ts_test) # save the test features as a npy file
-
-        np.save('features/poker_train_labels.npy', train_labels) # save the training features as a npy file
-        np.save('features/poker_test_labels.npy', test_labels) # save the test features as a npy file
-else:
-    ts_train = np.load('features/poker_ts_train.npy')
-    train_labels = np.load('features/poker_train_labels.npy')
-
-    ts_test = np.load('features/poker_ts_test.npy')
-    test_labels = np.load('features/poker_test_labels.npy')
-
-#### RUNNING LOGISTIC REGRESSION ####
-if logistic_regression:
-    from sklearn.linear_model import LogisticRegression 
-
-
-#### RUNNING K-MEANS CLUSTERING ####
-if k_means_clustering:
-    from sklearn.cluster import KMeans
-
-    kmeans = KMeans(n_clusters=4)
-    kmeans.fit(ts_train)
-    clusters = kmeans.predict(ts_test)
-
-#### RUNNING VC-GMM CLUSTERING ####
+#### VC-GMM CLUSTERING ON LEARNING DATASET ####
 if vc_gmm_clustering:
     import subprocess
 
     cmd_list = ["build/release/events_gmm",    # path to the C++ executable for clustering
-                "features/poker_ts_train.txt",          # path to the training features (saved in a text file)
-                "features/poker_ts_test.txt",           # path to the test features (saved in a text file)
-                "2",                           # int - C_p - number of clusters considered for each data point
-                "2",                           # int - G - search space (nearest neighbours for the C' clusters)
-                "1",                           # bool - plus1 - include one additional randomly chosen cluster to each of the search spaces
+                "features/poker_ts_train.txt", # path to the training features (saved in a text file)
+                "features/poker_ts_test.txt",  # path to the test features (saved in a text file)
+                "5",                           # int - C_p - number of clusters considered for each data point
+                "5",                           # int - G - search space (nearest neighbours for the C' clusters)
+                "1",                           # bool - plus1 - include one additional randomly chosen cluster
                 "10000",                       # int - N_core - size of subset
-                "4",                           # int - C - number of cluster centers
+                "200",                           # int - C - number of cluster centers
                 "20",                          # int - chain_length - chain length for AFK-MC² seeding
                 "0.0001",                      # float - convergence_threshold
                 "1",                           # bool - save - write cluster centers to a text file
                ]
     subprocess.call(cmd_list)
+
+#### AVERAGE HISTOGRAM OF ACTIVATED CLUSTERS ON LEARNING DATASET ####
+
+#### VC-GMM CLUSTERING ON TEST DATASET (VIA PREVIOUSLY FOUND CENTERS) ####
+
+#### CLASSIFICATION OF TEST SET VIA HISTOGRAM DISTANCE COMPARISION ####
+
+## 1. Euclidean distance
+
+## 2. Bhattacharyya distance

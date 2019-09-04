@@ -19,16 +19,14 @@
 #include <random>
 #include "blaze/Blaze.h"
 
+// x     - dataset or coreset
+// w     - weights
+// s     - cluster centers
+// mt    - random number generator
+// C     - number of cluster centers
+// chain - Markov chain length
 template <typename T>
-void
-afkmc2(
-    const blaze::DynamicMatrix<T, blaze::rowMajor>& x,  // dataset or coreset
-    const blaze::DynamicVector<T> w,                    // weights
-          blaze::DynamicMatrix<T, blaze::rowMajor>& s,  // cluster centers
-    std::mt19937_64& mt,                                // random number generator
-    size_t C,                                           // number of cluster centers
-    size_t chain                                        // Markov chain length
-) {
+void afkmc2(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicVector<T> w, blaze::DynamicMatrix<T, blaze::rowMajor>& s, std::mt19937_64& mt, size_t C, size_t chain) {
     using blaze::sqrNorm;
     using blaze::row;
 
