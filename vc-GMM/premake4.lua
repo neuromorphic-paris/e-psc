@@ -2,7 +2,7 @@ solution 'vc-GMM'
     configurations {'Release', 'Debug'}
     location 'build'
 
-    for index, file in pairs(os.matchfiles('source/*.cxx')) do
+    for index, file in pairs(os.matchfiles('applications/*.cpp')) do
     	local name = path.getbasename(file)
     	project(name)
     		-- General settings
