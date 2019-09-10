@@ -1,4 +1,4 @@
-# main.py
+# events.py
 
 # Created by Omar Oubari.
 # Email: omar.oubari@inserm.fr
@@ -16,8 +16,8 @@ import matplotlib.pyplot as plt
 
 #### PARAMETERS ####
 
-create_features = True; # choose whether to import the dataset and create time surfaces or load from an existing npy file
-save_astxt = True # choose to save the features as a .txt file
+create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
+save_astxt = False # choose to save the features as a .txt file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
 gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
@@ -131,7 +131,7 @@ if create_features:
 if vc_gmm_clustering:
     import subprocess
 
-    cmd_list = ["build/release/events_gmm",    # path to the C++ executable for clustering
+    cmd_list = ["build/release/events",    # path to the C++ executable for clustering
                 "features/poker_ts_train.txt", # path to the training features (saved in a text file)
                 "features/poker_ts_test.txt",  # path to the test features (saved in a text file)
                 "5",                           # int - C_p - number of clusters considered for each data point

@@ -25,8 +25,6 @@
 // s - cluster centers
 template <typename T>
 T quantization(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
-    using blaze::sqrNorm;
-    using blaze::row;
 
     size_t N = x.rows();
     size_t C = s.rows();
@@ -35,7 +33,7 @@ T quantization(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::D
     threads.parallel(N, [&] (size_t n, size_t t) -> void {
         T d2 = std::numeric_limits<T>::max();
         for (size_t c = 0; c < C; c++) {
-            d2 = std::min(d2, sqrNorm(row(x, n) - row(s, c)));
+            d2 = std::min(d2, blaze::sqrNorm(blaze::row(x, n) - blaze::row(s, c)));
         }
         sum[t][0] += d2;
     });
@@ -99,7 +97,6 @@ template <typename T>
 void savetxt(const std::string& path, const blaze::DynamicMatrix<T>& x) {
     std::ofstream ofs(path);
 
-    ofs << std::scientific;
     for (size_t i = 0; i < x.rows(); i++) {
         for (size_t j = 0; j < x.columns(); j++) {
             ofs << x(i, j) << "\t";

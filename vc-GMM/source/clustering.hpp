@@ -5,6 +5,8 @@
 //	LICENSE: THE SOFTWARE IS PROVIDED "AS IS" UNDER THE
 //	ACADEMIC FREE LICENSE (AFL) v3.0.
 //
+//  Modified by Omar Oubari <omar.oubari@inserm.fr>
+//  Added Prediction method
 /******************************************************************************/
 
 #include "variational.hpp"
@@ -12,6 +14,7 @@
 #include "seeding.hpp"
 #include "threads.hpp"
 #include "utility.hpp"
+#include "StatsLib/stats.hpp"
 
 template <typename T>
 struct clustering {
@@ -84,6 +87,29 @@ public:
             }
             prv = cur;
         }
+    }
+    
+    blaze::DynamicMatrix<T, blaze::rowMajor> predict(const blaze::DynamicMatrix<T, blaze::rowMajor>& X) {
+        
+        size_t N = x.rows();
+        size_t C = s.rows();
+        
+        blaze::DynamicMatrix<T, blaze::rowMajor> labels(N, C);
+        
+        algo.threads.parallel(N, [&] (size_t n, size_t t) -> void {
+            for (size_t c=0; c<C; c++) {
+            }
+        });
+        
+        // s -> centers (mean)
+        // w -> weights of coreset (pi)
+        // omega are the parameters of note
+        
+        
+        // do research on GMMs
+        // do research on coresets
+        // understand the paper to know how to work with the algorithms
+        return labels;
     }
     
     blaze::DynamicMatrix<T, blaze::rowMajor> cluster_centers(void) {

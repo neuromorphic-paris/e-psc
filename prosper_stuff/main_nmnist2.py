@@ -270,6 +270,8 @@ if classification:
 
             print("TEST: ", comm.rank , ": {}%".format(100.*(i+1)/len(test_rec_sizes)))
             print("size {} -> {}".format(my_test_data['y'].shape[0],test_rec_sizes[i]))
+
+    
     test_features = np.array(test_features)
     test_labels = np.array(test_labels2)
 

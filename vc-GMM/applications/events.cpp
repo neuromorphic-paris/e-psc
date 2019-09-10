@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
         
         // writing the cluster centers to a text file
         if (save) {
-            savetxt("results/cluster_centers.txt", vc_GMM.cluster_centers());
+            savetxt("gmm_centers.txt", vc_GMM.cluster_centers());
         }
     }
     
