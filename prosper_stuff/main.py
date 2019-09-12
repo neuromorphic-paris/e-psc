@@ -72,7 +72,7 @@ for recording in range(len(dataset_learning)):
                                             verbose=False)
 
         ts[idx] = time_surface
-        training_labels.append(recording)
+        training_labels.append(labels_learning[recording])
         idx += 1
 ts = ts.reshape((ts.shape[0], -1))
 
@@ -89,15 +89,29 @@ for recording in range(len(dataset_testing)):
     for k in range(len(dataset_testing[recording][0])):
         single_event = [dataset_testing[recording]
                         [0][k], dataset_testing[recording][1][k]]
-        time_surface = Time_Surface_event(xdim=ts_size,
-                                          ydim=ts_size,
-                                          event=single_event,
-                                          timecoeff=tau,
-                                          dataset=dataset_testing[recording],
-                                          num_polarities=polarities,
-                                          verbose=False)
+
+        if gaussian_ts:
+          # gaussian time surfaces
+          time_surface = Time_Surface_event2(xdim=ts_size,
+                                            ydim=ts_size,
+                                            event=single_event,
+                                            sigma=100,
+                                            dataset=dataset_learning[recording],
+                                            num_polarities=polarities,
+                                            minv=0.1,
+                                            verbose=False)
+        else:
+          # exponential time surfaces
+          time_surface = Time_Surface_event(xdim=ts_size,
+                                            ydim=ts_size,
+                                            event=single_event,
+                                            timecoeff=tau,
+                                            dataset=dataset_learning[recording],
+                                            num_polarities=polarities,
+                                            minv=0.1,
+                                            verbose=False)
         ts_test[idx] = time_surface
-        test_labels.append(recording)
+        test_labels.append(labels_testing[recording])
         idx += 1
 ts_test = ts_test.reshape((ts_test.shape[0], -1))
 

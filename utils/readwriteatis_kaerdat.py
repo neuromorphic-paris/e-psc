@@ -2,6 +2,29 @@ from struct import unpack, pack
 import numpy as np
 import sys
 
+def read_dataset(filename):
+    """Reads in the TD events contained in the N-MNIST/N-CALTECH101 dataset"""
+    f = open(filename, 'rb')
+    raw_data = np.fromfile(f, dtype=np.uint8)
+    f.close()
+    raw_data = np.uint32(raw_data)
+
+    all_y = raw_data[1::5]
+    all_x = raw_data[0::5]
+    all_p = (raw_data[2::5] & 128) >> 7 #bit 7
+    all_ts = ((raw_data[2::5] & 127) << 16) | (raw_data[3::5] << 8) | (raw_data[4::5])
+
+    #Process time stamp overflow events
+    time_increment = 2 ** 13
+    overflow_indices = np.where(all_y == 240)[0]
+    for overflow_index in overflow_indices:
+        all_ts[overflow_index:] += time_increment
+
+    #Everything else is a proper td spike
+    td_indices = np.where(all_y != 240)[0]
+
+    return all_ts[td_indices], all_x[td_indices], all_y[td_indices], all_p[td_indices]
+
 def readATIS_td(file_name, orig_at_zero = True, drop_negative_dt = True, verbose = True, events_restriction = [0, np.inf]):
 
     """ laisse les events avec le meme timestamp ! """

@@ -2,9 +2,9 @@
 #SBATCH --job-name="nmnist"
 #SBATCH --output=nmnist-%j.out
 #SBATCH --error=nmnist-%j.err
-#SBATCH --ntasks=124
+#SBATCH --ntasks=96
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=800M
+#SBATCH --mem-per-cpu=100M
 # mail alert at start, end and abortion of execution
 #SBATCH --mail-user=georgios.exarchakis@uni-oldenburg.de
 #SBATCH --mail-type=ALL

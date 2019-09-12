@@ -3,7 +3,7 @@ import h5py
 import numpy as np
 from readwriteatis_kaerdat import readATIS_td
 
-f = h5py.File('ncars', 'w')
+f = h5py.File('ncars.h5', 'w')
 train = f.create_group("train")
 test = f.create_group("test")
 

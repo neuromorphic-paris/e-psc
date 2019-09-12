@@ -23,9 +23,6 @@ nprocs = comm.size
 #print("running {} parallel processes".format(nprocs))
 print(sys.version_info)
 
-
-
-
 # PARAMETERS ####
 
 learning = False  # Decide whether to run the sparse coding algorithm
@@ -59,7 +56,7 @@ if comm.rank == 0:
 #import ipdb;ipdb.set_trace()
 dtr = comm.scatter(to_scatter_train)
 dte = comm.scatter(to_scatter_test)
-print("rank: ", comm.rank, len(dtr), len(dte))
+print("first rank: ", comm.rank, len(dtr), len(dte))
 sys.stdout.flush()
 # number_of_samples = sum(sizes_of_train_samples)
 
@@ -122,7 +119,7 @@ test_labels = np.array(test_labels)
 # ts_test_res = ts_test.shape[0] % comm.size
 # ts_test = ts_test[:-ts_test_res]
 # test_labels = test_labels[:-ts_test_res]
-print("rank: ", comm.rank, ts.shape, train_labels.shape)
+print("second rank: ", comm.rank, ts.shape, train_labels.shape)
 sys.stdout.flush()
 comm.barrier()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
@@ -242,14 +239,25 @@ if classification:
         assert (this_l == this_l[0]).all()
         train_labels2.append(this_l[0])
         start = stop
-        if (comm.rank%7)==0:
-
-            print(comm.rank , ": {}%".format(100.*(i+1)/len(train_rec_sizes)))
-            print("size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i]))
-
+        if (comm.rank%13)==0:
+            print("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+                  "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i]))
+        if (comm.rank)==1:
+            print("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+                  "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i]))
+        #break
+    print("MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,len(train_features),len(train_labels2)))
     train_features = np.array(train_features)
     train_labels = np.array(train_labels2)
-
+    print("Numpy MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,train_features.shape,train_labels.shape))
+    comm.Barrier()
+    import time
+    time.sleep(20)
+    time.sleep(comm.rank/10.)
+    if comm.rank==0:
+        print("#"*40)
+    comm.barrier()
+    print(comm.rank)
     allranks = comm.gather(comm.rank)
     if comm.rank==0:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
