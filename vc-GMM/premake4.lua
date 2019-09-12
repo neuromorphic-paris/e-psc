@@ -2,7 +2,7 @@ solution 'vc-GMM'
     configurations {'Release', 'Debug'}
     location 'build'
 
-    for index, file in pairs(os.matchfiles('applications/*.cxx')) do
+    for index, file in pairs(os.matchfiles('source/*.cxx')) do
     	local name = path.getbasename(file)
     	project(name)
     		-- General settings
@@ -12,7 +12,7 @@ solution 'vc-GMM'
 
 			-- All files in source, third_party and applications
         	files {'source/**.hxx',
-        		'applications/' .. name .. '.cxx'
+        		   'source/' .. name .. '.cxx'
         	}
 
 	        -- Declare the configurations
