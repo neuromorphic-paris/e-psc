@@ -2,7 +2,7 @@
 #SBATCH --job-name="nmnist"
 #SBATCH --output=nmnist-%j.out
 #SBATCH --error=nmnist-%j.err
-#SBATCH --ntasks=64
+#SBATCH --ntasks=124
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=800M
 # mail alert at start, end and abortion of execution
@@ -13,7 +13,7 @@
 #SBATCH --time=48:00:00
 ###SBATCH --gres=gpu:0
 ###SBATCH --nodes=1
-#SBATCH --nodelist=gold0[1-9]
+#SBATCH --nodelist=gold0[1-3],gold[05-11]
 ###SBATCH --export=ALL
 #
 ### Keep in mind to load your desired modules here. Otherwise they won't be available in your Job. Read more about modules at Environment modules

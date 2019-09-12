@@ -36,7 +36,7 @@ tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
 if resume:
-    output_path = "/users/ml/xoex6879/workspace/psc/prosper_stuff/output/main_nmnist.py.d1062928/"
+    output_path = "/home/exarchakis/workspace/psc/prosper_stuff/output/main_nmnist.py.d1062928/"
 else:
     output_path = create_output_path()
 
@@ -225,6 +225,11 @@ if classification:
     train_features=[]
     train_labels2=[]
     start=0
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        print("ranks that have not finished bussiness ", notincluded)
+        print(allranks)
     for i in range(len(train_rec_sizes)):
         stop = start + train_rec_sizes[i]
 
@@ -244,6 +249,12 @@ if classification:
 
     train_features = np.array(train_features)
     train_labels = np.array(train_labels2)
+
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        print("ranks that have not finished bussiness ", notincluded)
+        print(allranks)
     
     train_features_labels = comm.gather((train_features, train_labels))
     if comm.rank == 0:
@@ -251,6 +262,11 @@ if classification:
         train_labels = np.concatenate([f[1] for f in train_features_labels])
         np.savez(output_path+'/map_features_labels.npz',train_features=train_features, train_labels=train_labels)
 
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        print("ranks that have not finished bussiness ", notincluded)
+        print(allranks)
     test_features = []
     test_labels2 = []
     start = 0
@@ -273,6 +289,12 @@ if classification:
     test_features = np.array(test_features)
     test_labels = np.array(test_labels2)
 
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        print("ranks that have not finished bussiness ", notincluded)
+        print(allranks)
+        
     test_features_labels = comm.gather((test_features, test_labels))
     if comm.rank == 0:
         print("Start Classifying")
