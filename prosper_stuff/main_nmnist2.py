@@ -225,7 +225,7 @@ if classification:
     allranks = comm.gather(comm.rank)
     if comm.rank==0:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
-        print("ranks that have not finished bussiness ", notincluded)
+        print("1st ranks that have not finished bussiness ", notincluded)
         print(allranks)
     for i in range(len(train_rec_sizes)):
         stop = start + train_rec_sizes[i]
@@ -261,7 +261,7 @@ if classification:
     allranks = comm.gather(comm.rank)
     if comm.rank==0:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
-        print("ranks that have not finished bussiness ", notincluded)
+        print("2nd ranks that have not finished bussiness ", notincluded)
         print(allranks)
     
     train_features_labels = comm.gather((train_features, train_labels))
@@ -273,7 +273,7 @@ if classification:
     allranks = comm.gather(comm.rank)
     if comm.rank==0:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
-        print("ranks that have not finished bussiness ", notincluded)
+        print("3rd ranks that have not finished bussiness ", notincluded)
         print(allranks)
     test_features = []
     test_labels2 = []
@@ -300,7 +300,7 @@ if classification:
     allranks = comm.gather(comm.rank)
     if comm.rank==0:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
-        print("ranks that have not finished bussiness ", notincluded)
+        print("4th ranks that have not finished bussiness ", notincluded)
         print(allranks)
         
     test_features_labels = comm.gather((test_features, test_labels))
