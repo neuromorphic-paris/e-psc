@@ -26,6 +26,20 @@ brew install cmake
 sudo apt-get install cmake
 ~~~~
 
+# Installing Premake 4
+
+## On Mac
+
+assuming homebrew was already installed (see previous section)
+~~~~
+brew install premake
+~~~~
+
+## On Linux
+~~~~
+sudo apt install premake4
+~~~~
+
 # Installing Blaze
 
 1. get the source code from here: https://bitbucket.org/blaze-lib/blaze/src/master/
