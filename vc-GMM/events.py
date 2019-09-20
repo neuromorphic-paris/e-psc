@@ -74,7 +74,7 @@ if create_features:
                                                 minv=0.1,
                                                 verbose=False)
 
-            if np.count_nonzero(time_surface):
+            if np.count_nonzero(time_surface): # improvement needed for minimum activity
                 ts_train[idx] = time_surface
                 train_labels.append(labels_learning[recording])
                 idx += 1

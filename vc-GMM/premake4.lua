@@ -12,9 +12,7 @@ solution 'vc-GMM'
 
 			-- All files in source and applications
         	files {'source/**.hpp',
-                 'source/**.h',
-                 'source/**.ipp',
-        		     'applications/' .. name .. '.cpp'
+        		   'applications/' .. name .. '.cpp'
         	}
 
 	        -- Declare the configurations

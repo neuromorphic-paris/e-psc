@@ -38,12 +38,43 @@ T quantization(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::D
         sum[t][0] += d2;
     });
 
+    // inference - which c has the lowest d (argmin)
+    // F
+    // histogram
+    
     T res = T(0);
     for (auto& it : sum) {
         res += it[0];
     }
 
     return res;
+}
+
+// infers the cluster of a data point
+// x - dataset
+// s - cluster centers
+template <typename T>
+std::vector<size_t> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
+    size_t N = x.rows();
+    size_t C = s.rows();
+    
+    std::vector<size_t> assigned_clusters(x.rows(), 0);
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
+        T d2 = std::numeric_limits<T>::max();
+        size_t c_min = std::numeric_limits<T>::max();
+        
+        // find the cluster with the lowest quantization error
+        for (size_t c = 0; c < C; c++) {
+            T tmp_d2 = blaze::sqrNorm(blaze::row(x, n) - blaze::row(s, c));
+            if (tmp_d2 < d2) {
+                d2 = tmp_d2;
+                c_min = c;
+            }
+        }
+        assigned_clusters[n] = c_min;
+    });
+    
+    return assigned_clusters;
 }
 
 // reads a blaze matrix from whitespace separated text file
@@ -90,6 +121,14 @@ void loadtxt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& 
     std::cout << "data points N = " << x.rows()    << "\n";
     std::cout << "features    D = " << x.columns() << "\n";
     std::cout << std::endl;
+}
+
+// write vector of size_t as a text file
+void savevec(const std::string& path, const std::vector<size_t>& x) {
+    std::ofstream ofs(path);
+    for (const auto &e : x) {
+        ofs << e << "\n";
+    }
 }
 
 // writes blaze matrix as a text file

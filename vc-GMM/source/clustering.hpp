@@ -14,7 +14,6 @@
 #include "seeding.hpp"
 #include "threads.hpp"
 #include "utility.hpp"
-#include "StatsLib/stats.hpp"
 
 template <typename T>
 struct clustering {
@@ -89,27 +88,14 @@ public:
         }
     }
     
-    blaze::DynamicMatrix<T, blaze::rowMajor> predict(const blaze::DynamicMatrix<T, blaze::rowMajor>& X) {
-        
-        size_t N = x.rows();
-        size_t C = s.rows();
-        
-        blaze::DynamicMatrix<T, blaze::rowMajor> labels(N, C);
-        
-        algo.threads.parallel(N, [&] (size_t n, size_t t) -> void {
-            for (size_t c=0; c<C; c++) {
-            }
-        });
-        
-        // s -> centers (mean)
-        // w -> weights of coreset (pi)
-        // omega are the parameters of note
-        
-        
-        // do research on GMMs
-        // do research on coresets
-        // understand the paper to know how to work with the algorithms
-        return labels;
+    // returns the cluster assignments for the training data
+    std::vector<size_t> predict(void) {
+        return inference(x, s, algo.threads);
+    }
+    
+    // predicts the clusters of the given testing data
+    std::vector<size_t> predict(const blaze::DynamicMatrix<T, blaze::rowMajor>& data) {
+        return inference(data, s, algo.threads);
     }
     
     blaze::DynamicMatrix<T, blaze::rowMajor> cluster_centers(void) {
