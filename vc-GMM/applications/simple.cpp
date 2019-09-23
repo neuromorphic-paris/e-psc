@@ -28,14 +28,14 @@ int main(int argc, char** argv) {
         bool save_prediction            = std::atoi(argv[10]); // write assigned clusters to a text file
         int seed                        = 123;                 // seed for random number generator
         int nthreads = std::thread::hardware_concurrency();    // number of C++11 threads
-    
+        
         // READING DATA
         blaze::DynamicMatrix<double, blaze::rowMajor> data_features;
         loadtxt(data_path, data_features); // read dataset
-        
+                
         // FITTING MODEL TO TRAINING DATASET
         clustering<double> vc_GMM(data_features, N_core, C, chain_length, C_p, G, plus1, nthreads, seed);
-
+         
         vc_GMM.converge(convergence_threshold); // computes EM-iterations until the relative change in free energy falls below 1e-4
         auto cluster_assignments = vc_GMM.predict(); // returns the cluster assignments for the training data
         

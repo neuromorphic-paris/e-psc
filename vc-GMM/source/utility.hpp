@@ -54,11 +54,11 @@ T quantization(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::D
 // x - dataset
 // s - cluster centers
 template <typename T>
-std::vector<size_t> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
+std::vector<std::pair<T,T>> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
     size_t N = x.rows();
     size_t C = s.rows();
     
-    std::vector<size_t> assigned_clusters(x.rows(), 0);
+    std::vector<std::pair<T,T>> assigned_clusters(x.rows(), std::make_pair(0, 0));
     threads.parallel(N, [&] (size_t n, size_t t) -> void {
         T d2 = std::numeric_limits<T>::max();
         size_t c_min = std::numeric_limits<T>::max();
@@ -71,7 +71,8 @@ std::vector<size_t> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x,
                 c_min = c;
             }
         }
-        assigned_clusters[n] = c_min;
+        assigned_clusters[n].first = s(c_min,0);
+        assigned_clusters[n].second = s(c_min,1);
     });
     
     return assigned_clusters;
@@ -124,10 +125,11 @@ void loadtxt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& 
 }
 
 // write vector of size_t as a text file
-void savevec(const std::string& path, const std::vector<size_t>& x) {
+template <typename T>
+void savevec(const std::string& path, const std::vector<std::pair<T,T>>& x) {
     std::ofstream ofs(path);
     for (const auto &e : x) {
-        ofs << e << "\n";
+        ofs << e.first << " " << e.second << "\n";
     }
 }
 

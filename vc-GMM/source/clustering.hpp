@@ -89,12 +89,12 @@ public:
     }
     
     // returns the cluster assignments for the training data
-    std::vector<size_t> predict(void) {
+    std::vector<std::pair<T,T>> predict(void) {
         return inference(x, s, algo.threads);
     }
     
     // predicts the clusters of the given testing data
-    std::vector<size_t> predict(const blaze::DynamicMatrix<T, blaze::rowMajor>& data) {
+    std::vector<std::pair<T,T>> predict(const blaze::DynamicMatrix<T, blaze::rowMajor>& data) {
         return inference(data, s, algo.threads);
     }
     
