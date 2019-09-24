@@ -257,9 +257,65 @@ if classification:
             #if (comm.rank)==1:
             #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
             #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
-            if i==(len(train_rec_size)-1):
+            if i==(len(train_rec_sizes)-1):
                 pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
                       "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+    except AssertionError as e:
+        pp(e)    
+    except AttributeError as e:
+        pp(e)    
+    except EOFError as e:
+        pp(e)    
+    except FloatingPointError as e:
+        pp(e)    
+   
+    except ImportError as e:
+        pp(e)    
+    except IndexError as e:
+        pp(e)    
+    except KeyError as e:
+        pp(e)    
+   
+    except MemoryError as e:
+        pp(e)    
+    except NameError as e:
+        pp(e)    
+    except NotImplementedError as e:
+        pp(e)    
+    except OSError as e:
+        pp(e)    
+    except OverflowError as e:
+        pp(e)    
+    except ReferenceError as e:
+        pp(e)    
+    except RuntimeError as e:
+        pp(e)    
+   
+    except SyntaxError as e:
+        pp(e)    
+    except IndentationError as e:
+        pp(e)    
+    except TabError as e:
+        pp(e)    
+    except SystemError as e:
+        pp(e)    
+  
+    except TypeError as e:
+        pp(e)    
+    except UnboundLocalError as e:
+        pp(e)    
+    except UnicodeError as e:
+        pp(e)    
+    except UnicodeEncodeError as e:
+        pp(e)    
+    except UnicodeDecodeError as e:
+        pp(e)    
+    except UnicodeTranslateError as e:
+        pp(e)    
+    except ValueError as e:
+        pp(e)    
+    except ZeroDivisionError as e:
+        pp(e)
     except:
         pp("Error thrown by {}".format(comm.rank))
         #break
