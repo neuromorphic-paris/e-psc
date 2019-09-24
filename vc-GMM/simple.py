@@ -9,6 +9,7 @@
 import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import spatial
 
 cmd_list = ["build/release/simple",        # path to the C++ executable for clustering
             "datasets/simple/data.txt",    # path to the training features (saved in a text file)
@@ -25,18 +26,24 @@ cmd_list = ["build/release/simple",        # path to the C++ executable for clus
 
 subprocess.call(cmd_list)
 
-# plot grounds truth centers VS GMM centers
+### plot grounds truth centers VS GMM centers
 gt_centers = np.loadtxt("datasets/simple/gt_centers.txt")
 gmm_centers = np.loadtxt("gmm_centers.txt")
 
 fig = plt.scatter(gt_centers[:,0],gt_centers[:,1])
 fig = plt.scatter(gmm_centers[:,0],gmm_centers[:,1])
 
-# distance grounds truth and GM
-gt_centers = np.loadtxt("datasets/simple/gt_labels.txt")
-gmm_centers = np.loadtxt("gmm_labels.txt")
+# find closest gt cluster and assign the proper index
+kd_tree = spatial.KDTree(gt_centers)
+gmm_center_labels = [kd_tree.query(center)[1] + 1 for center in gmm_centers]
 
-clustering_error = np.mean(gt_centers != gmm_centers)
+# correct inferred center indices according to match the ground truth indexing
+gt_labels = np.loadtxt("datasets/simple/gt_labels.txt")
+gmm_output = np.loadtxt("gmm_labels.txt")[:,1:]
+
+gmm_corrected_labels = [gmm_center_labels[np.where((gmm_centers[:,0]==inferred_center[0]) & (gmm_centers[:,1]==inferred_center[1]))[0][0]] for inferred_center in gmm_output]
+
+clustering_error = np.mean(gt_labels != gmm_corrected_labels)
 print("clustering error",clustering_error)
 
 plt.show()

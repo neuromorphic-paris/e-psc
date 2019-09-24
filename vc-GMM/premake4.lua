@@ -33,11 +33,11 @@ solution 'vc-GMM'
 	        -- Linux specific settings
 	        configuration 'linux'
               links {'pthread'}
-	            buildoptions {'-std=c++14'}
-	           	linkoptions {'-std=c++14'}
+	            buildoptions {'-std=c++17'}
+	           	linkoptions {'-std=c++17'}
 
 	        -- Mac OS X specific settings
 	        configuration 'macosx'
-	            buildoptions {'-std=c++14'}
-	           	linkoptions {'-std=c++14'}
+	            buildoptions {'-std=c++17'}
+	           	linkoptions {'-std=c++17'}
 end
