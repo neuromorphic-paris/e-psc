@@ -238,27 +238,30 @@ if classification:
         pp("1st ranks that have not finished bussiness {}".format( notincluded),0)
         pp(allranks,0)
 
-    for i in range(len(train_rec_sizes)):
-        stop = start + train_rec_sizes[i]
+    try:
+        for i in range(len(train_rec_sizes)):
+            stop = start + train_rec_sizes[i]
 
-        my_train_data = {'y': ts[start:stop]}
-        res_train = model.inference(anneal, model_params, my_train_data,
-                                Hprime_max=Hprime, gamma_max=gamma)
+            my_train_data = {'y': ts[start:stop]}
+            res_train = model.inference(anneal, model_params, my_train_data,
+                                    Hprime_max=Hprime, gamma_max=gamma)
 
-        train_features.append(res_train['s'][:, 0, :].mean(0))
-        this_l = train_labels[start:stop]
-        assert (this_l == this_l[0]).all()
-        train_labels2.append(this_l[0])
-        start = stop
-        #if (comm.rank%13)==0:
-        #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
-        #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
-        #if (comm.rank)==1:
-        #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
-        #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
-        if i==(len(train_rec_size)-1):
-            pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
-                  "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+            train_features.append(res_train['s'][:, 0, :].mean(0))
+            this_l = train_labels[start:stop]
+            assert (this_l == this_l[0]).all()
+            train_labels2.append(this_l[0])
+            start = stop
+            #if (comm.rank%13)==0:
+            #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+            #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+            #if (comm.rank)==1:
+            #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+            #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+            if i==(len(train_rec_size)-1):
+                pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+                      "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+    except:
+        pp("Error thrown by {}".format(comm.rank))
         #break
     pp("MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,len(train_features),len(train_labels2)))
     train_features = np.array(train_features)
