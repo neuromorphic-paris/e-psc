@@ -1,4 +1,5 @@
 import sys
+import time
 import prosper
 import numpy as np
 from scipy.stats import truncnorm
@@ -20,14 +21,19 @@ import os, sys
 comm = MPI.COMM_WORLD
 
 nprocs = comm.size
-#print("running {} parallel processes".format(nprocs))
-print(sys.version_info)
+#pp("running {} parallel processes".format(nprocs))
 
+def pp(msg,rank=-1,comm=comm):
+    if rank==-1:
+        print(msg)
+        sys.stdout.flush()
+    elif comm.rank==rank:
+        print(msg)
+        sys.stdout.flush()
 
-
+pp(sys.version_info,0)
 
 # PARAMETERS ####
-
 learning = False  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
 resume  = True
@@ -42,7 +48,7 @@ else:
 
 dtr = None
 dte = None
-#print("rank: ", comm.rank)
+#pp("rank: ", comm.rank)
 
 to_scatter_train = None
 to_scatter_test = None
@@ -59,7 +65,7 @@ if comm.rank == 0:
 #import ipdb;ipdb.set_trace()
 dtr = comm.scatter(to_scatter_train)
 dte = comm.scatter(to_scatter_test)
-print("rank: ", comm.rank, len(dtr), len(dte))
+pp(("first rank: ", comm.rank, len(dtr), len(dte)))
 sys.stdout.flush()
 # number_of_samples = sum(sizes_of_train_samples)
 
@@ -93,7 +99,7 @@ train_labels = np.array(train_labels)
 # ts_res = ts.shape[0] % comm.size
 # ts = ts[:-ts_res]
 # train_labels = train_labels[:-ts_res]
-# print(len(train_labels))
+# pp(len(train_labels))
 
 ts_test = []
 test_labels = []
@@ -122,7 +128,7 @@ test_labels = np.array(test_labels)
 # ts_test_res = ts_test.shape[0] % comm.size
 # ts_test = ts_test[:-ts_test_res]
 # test_labels = test_labels[:-ts_test_res]
-print("rank: ", comm.rank, ts.shape, train_labels.shape)
+pp(("second rank: ", comm.rank, ts.shape, train_labels.shape))
 sys.stdout.flush()
 comm.barrier()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
@@ -166,12 +172,12 @@ if learning:
     assert train_labels.shape[0] == ts.shape[0]
     my_data = {'y': ts, 'l': train_labels}
     model_params = model.standard_init(my_data)
-    print("model defined")
+    pp("model defined")
     em = EM(model=model, anneal=anneal)
     em.data = my_data
     em.lparams = model_params
     em.run()
-    print("em finished")
+    pp("em finished")
 
     my_test_data = {'y': ts_test}
     res = model.inference(anneal, em.lparams, my_test_data)
@@ -218,13 +224,19 @@ if resume:
 if classification:
 
     # my_train_data = {'y': ts}
-    # print(Hprime,gamma)
+    # pp(Hprime,gamma)
     # res_train = model.inference(anneal, model_params, my_train_data,
                                 # Hprime_max=Hprime, gamma_max=gamma)
 
     train_features=[]
     train_labels2=[]
     start=0
+
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        pp("1st ranks that have not finished bussiness {}".format( notincluded),0)
+        pp(allranks,0)
 
     for i in range(len(train_rec_sizes)):
         stop = start + train_rec_sizes[i]
@@ -238,27 +250,47 @@ if classification:
         assert (this_l == this_l[0]).all()
         train_labels2.append(this_l[0])
         start = stop
-       # if (comm.rank%7)==0:
-            #print(comm.rank , ": {}%".format(100.*(i+1)/len(train_rec_sizes)))
-            #print("size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i]))
-
-
+        #if (comm.rank%13)==0:
+        #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+        #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+        #if (comm.rank)==1:
+        #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+        #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+        if i==(len(train_rec_size)-1):
+            pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
+                  "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
+        #break
+    pp("MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,len(train_features),len(train_labels2)))
     train_features = np.array(train_features)
     train_labels = np.array(train_labels2)
-    print("converting to np")
-    train_features_labels = comm.gather((train_features, train_labels),root=0)
-    print("comm.gather")
+    pp("Numpy MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,train_features.shape,train_labels.shape))
+    if comm.rank==0:
+        pp("#"*40)
+    pp(comm.rank)
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        pp(("2nd ranks that have not finished bussiness ", notincluded))
+        pp(allranks)
+    
+    train_features_labels = comm.gather((train_features, train_labels))
+
     if comm.rank == 0:
-        print("parsing features and labels")
+        pp("parsing features and labels")
         train_features = np.concatenate([f[0] for f in train_features_labels])
         train_labels = np.concatenate([f[1] for f in train_features_labels])
-        print("saving to npz")
+        pp("saving to npz")
         np.savez(output_path+'/map_features_labels.npz',train_features=train_features, train_labels=train_labels)
 
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        pp(("3rd ranks that have not finished bussiness ", notincluded))
+        pp(allranks)
     test_features = []
     test_labels2 = []
     start = 0
-    print("starting test")
+    pp("starting test")
     for i in range(len(test_rec_sizes)):
         stop = start + test_rec_sizes[i]
 
@@ -272,30 +304,36 @@ if classification:
         test_labels2.append(this_l[0])
         start = stop
         #if (comm.rank%7)==0:
-           # print("TEST: ", comm.rank , ": {}%".format(100.*(i+1)/len(test_rec_sizes)))
-           # print("size {} -> {}".format(my_test_data['y'].shape[0],test_rec_sizes[i]))
+           # pp("TEST: ", comm.rank , ": {}%".format(100.*(i+1)/len(test_rec_sizes)))
+           # pp("size {} -> {}".format(my_test_data['y'].shape[0],test_rec_sizes[i]))
 
     test_features = np.array(test_features)
     test_labels = np.array(test_labels2)
 
+    allranks = comm.gather(comm.rank)
+    if comm.rank==0:
+        notincluded = [ n for n in range(comm.size) if n not in allranks]
+        pp(("4th ranks that have not finished bussiness ", notincluded))
+        pp(allranks)
+        
     test_features_labels = comm.gather((test_features, test_labels))
     if comm.rank == 0:
-        print("Start Classifying")
+        pp("Start Classifying")
         test_features = np.concatenate([f[0] for f in test_features_labels])
         test_labels = np.concatenate([f[1] for f in test_features_labels])
 
         np.savez(output_path+'/map_features_labels_all.npz',train_features=train_features, train_labels=train_labels,test_features=test_features,test_labels=test_labels)
-        print("Import stuff")
+        pp("Import stuff")
         from sklearn.linear_model import LogisticRegression
         from sklearn import metrics
 
         lreg = LogisticRegression(solver='lbfgs', multi_class='auto',verbose=1)
-        print("FIT")
+        pp("FIT")
         lreg.fit(train_features, train_labels)
         predicted_labels = lreg.predict(test_features)
 
         test_labels = np.array(test_labels)
-        print("Classification report for classifier %s:\n%s\n"
-              % (lreg, metrics.classification_report(test_labels, predicted_labels)))
-        print("Confusion matrix:\n%s" %
-              metrics.confusion_matrix(test_labels, predicted_labels))
+        pp(("Classification report for classifier %s:\n%s\n"
+              % (lreg, metrics.classification_report(test_labels, predicted_labels))))
+        pp(("Confusion matrix:\n%s" %
+              metrics.confusion_matrix(test_labels, predicted_labels)))
