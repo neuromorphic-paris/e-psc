@@ -131,26 +131,23 @@ if create_features:
 if vc_gmm_clustering:
     import subprocess
 
-    cmd_list = ["build/release/events",    # path to the C++ executable for clustering
+    cmd_list = ["build/release/events",        # path to the C++ executable for clustering
                 "features/poker_ts_train.txt", # path to the training features (saved in a text file)
                 "features/poker_ts_test.txt",  # path to the test features (saved in a text file)
                 "5",                           # int - C_p - number of clusters considered for each data point
                 "5",                           # int - G - search space (nearest neighbours for the C' clusters)
                 "1",                           # bool - plus1 - include one additional randomly chosen cluster
                 "10000",                       # int - N_core - size of subset
-                "200",                           # int - C - number of cluster centers
+                "200",                         # int - C - number of cluster centers
                 "20",                          # int - chain_length - chain length for AFK-MC² seeding
                 "0.0001",                      # float - convergence_threshold
-                "1",                           # bool - save - write cluster centers to a text file
+                "1",                           # bool - save_centers - write cluster centers to a text file
+                "1",                           # bool - save_prediction - write assigned clusters to a text file
                ]
     subprocess.call(cmd_list)
 
 #### AVERAGE HISTOGRAM OF ACTIVATED CLUSTERS ON LEARNING DATASET ####
 
-#### VC-GMM CLUSTERING ON TEST DATASET (VIA PREVIOUSLY FOUND CENTERS) ####
+#### VC-GMM CLUSTERING ON TEST DATASET ####
 
 #### CLASSIFICATION OF TEST SET VIA HISTOGRAM DISTANCE COMPARISION ####
-
-## 1. Euclidean distance
-
-## 2. Bhattacharyya distance

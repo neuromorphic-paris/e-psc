@@ -27,18 +27,23 @@ int main(int argc, char** argv) {
         int chain_length                = std::atoi(argv[8]);  // chain length for AFK-MC² seeding
         double convergence_threshold    = std::stod(argv[9]);  // convergence threshold
         bool save_centers               = std::atoi(argv[10]); // write cluster centers to a text file
-        bool save_prediction            = true;                // write assigned clusters to a text file
+        bool save_prediction            = std::atoi(argv[11]); // write assigned clusters to a text file
         int seed                        = 123;                 // seed for random number generator
         int nthreads = std::thread::hardware_concurrency();    // number of C++11 threads
         
         // READING DATA
         blaze::DynamicMatrix<double, blaze::rowMajor> train_features;
-        loadtxt(path_train_features, train_features); // read dataset
+        loadtxt(path_train_features, train_features); // read training dataset
+        
+        blaze::DynamicMatrix<double, blaze::rowMajor> test_features;
+        loadtxt(path_test_features, test_features); // read test dataset
         
         // FITTING MODEL TO TRAINING DATASET
         clustering<double> vc_GMM(train_features, N_core, C, chain_length, C_p, G, plus1, nthreads, seed);
 
-        vc_GMM.converge(convergence_threshold); // computes EM-iterations until the relative change in free energy falls below 1e-4
+        vc_GMM.converge(convergence_threshold); // computes EM-iterations until the relative change in free energy falls below the convergence threshold
+        auto training_assignments = vc_GMM.predict(); // returns the cluster assignments for the train dataset
+        auto test_assignments = vc_GMM.predict(test_features); // returns the cluster assignments for the test dataset
         
         // writing the cluster centers to a text file
         if (save_centers) {
@@ -46,7 +51,8 @@ int main(int argc, char** argv) {
         }
         
         if (save_prediction) {
-            std::cout << "time-surface prediction not implemented yet" << std::endl;
+            savevec("gmm_train_labels.txt", training_assignments);
+            savevec("gmm_test_labels.txt", test_assignments);
         }
     }
     
