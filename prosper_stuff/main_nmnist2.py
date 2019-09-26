@@ -265,61 +265,59 @@ if classification:
                 pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
                       "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
     except AssertionError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except AttributeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except EOFError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except FloatingPointError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except ImportError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except IndexError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except KeyError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except MemoryError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except NameError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except NotImplementedError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except OSError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except OverflowError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except ReferenceError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except RuntimeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except SyntaxError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except IndentationError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except TabError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except SystemError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except TypeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except UnboundLocalError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except UnicodeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except UnicodeEncodeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except UnicodeDecodeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except UnicodeTranslateError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except ValueError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except ZeroDivisionError as e:
-        pp(e)
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
     except:
-        pp("Error thrown by {:04}".format(comm.rank))
-    finally:
-        pp("Error was not caught by {:04}".format(comm.rank))
+        pp("Unknown error thrown by {:04}".format(comm.rank))
         #break
     pp("MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,len(train_features),len(train_labels2)))
     train_features = np.array(train_features).tolist()
@@ -333,7 +331,7 @@ if classification:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
         pp(("2nd ranks that have not finished bussiness ", notincluded))
         pp(allranks)
-    
+
     train_features_labels = comm.gather((train_features, train_labels))
 
     if comm.rank == 0:
@@ -376,7 +374,7 @@ if classification:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
         pp(("4th ranks that have not finished bussiness ", notincluded))
         pp(allranks)
-        
+    
     test_features_labels = comm.gather((test_features, test_labels))
     if comm.rank == 0:
         pp("Start Classifying")
