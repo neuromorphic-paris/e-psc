@@ -243,11 +243,12 @@ if classification:
             stop = start + train_rec_sizes[i]
 
             my_train_data = {'y': ts[start:stop]}
-            res_train = model.inference(anneal, model_params, my_train_data,
-                                    Hprime_max=Hprime, gamma_max=gamma)
+            #res_train = model.inference(anneal, model_params, my_train_data,
+            #                        Hprime_max=Hprime, gamma_max=gamma)
 
-            train_features.append(res_train['s'][:, 0, :].mean(0))
-            assert np.isfinite(train_features).all()
+            #train_features.append(res_train['s'][:, 0, :].mean(0))
+            train_features.append(np.random.rand(H))
+            
             assert type(train_features[-1])==np.ndarray
             assert train_features[-1].shape[0]==H
             this_l = train_labels[start:stop]
@@ -261,7 +262,6 @@ if classification:
             #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
             #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
             if i==(len(train_rec_sizes)-1):
-                pp("Train: {:04} min: {} max: {}".format(comm.rank,np.min(train_features),np.max(train_features)))
                 pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
                       "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
     except AssertionError as e:
