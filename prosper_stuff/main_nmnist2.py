@@ -381,7 +381,7 @@ if classification:
         test_features = np.concatenate([f[0] for f in test_features_labels])
         test_labels = np.concatenate([f[1] for f in test_features_labels])
 
-        np.savez(output_path+'/map_features_labels_all.npz',train_features=train_features, train_labels=train_labels,test_features=test_features,test_labels=test_labels)
+        np.savez(output_path+'/map_features_labels_all.npz', train_features=train_features, train_labels=train_labels,test_features=test_features,test_labels=test_labels)
         pp("Import stuff")
         from sklearn.linear_model import LogisticRegression
         from sklearn import metrics
