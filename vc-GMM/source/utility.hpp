@@ -18,32 +18,30 @@
 #include <vector>
 
 #include "blaze/Blaze.h"
-#include "threads.hxx"
+#include "threads.hpp"
 
 // computes the quantization error
+// x - dataset
+// s - cluster centers
 template <typename T>
-T
-quantization(
-    const blaze::DynamicMatrix<T, blaze::rowMajor>& x,  // dataset
-    const blaze::DynamicMatrix<T, blaze::rowMajor>& s,  // cluster centers
-    tp& threads
-) {
-    using blaze::sqrNorm;
-    using blaze::row;
+T quantization(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
 
     size_t N = x.rows();
     size_t C = s.rows();
 
     std::vector<std::array<T, 64>> sum(threads.size());
-    threads.parallel(N, [&] (size_t n, size_t t)
-    -> void {
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
         T d2 = std::numeric_limits<T>::max();
         for (size_t c = 0; c < C; c++) {
-            d2 = std::min(d2, sqrNorm(row(x, n) - row(s, c)));
+            d2 = std::min(d2, blaze::sqrNorm(blaze::row(x, n) - blaze::row(s, c)));
         }
         sum[t][0] += d2;
     });
 
+    // inference - which c has the lowest d (argmin)
+    // F
+    // histogram
+    
     T res = T(0);
     for (auto& it : sum) {
         res += it[0];
@@ -52,13 +50,39 @@ quantization(
     return res;
 }
 
+// infers the cluster of a data point
+// x - dataset
+// s - cluster centers
+template <typename T>
+std::vector<std::tuple<size_t,T,T>> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
+    size_t N = x.rows();
+    size_t C = s.rows();
+    
+    std::vector<std::tuple<size_t,T,T>> assigned_clusters(x.rows(), std::make_tuple(0, 0, 0));
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
+        T d2 = std::numeric_limits<T>::max();
+        size_t c_min = std::numeric_limits<T>::max();
+        
+        // find the cluster with the lowest quantization error
+        for (size_t c = 0; c < C; c++) {
+            T tmp_d2 = blaze::sqrNorm(blaze::row(x, n) - blaze::row(s, c));
+            if (tmp_d2 < d2) {
+                d2 = tmp_d2;
+                c_min = c;
+            }
+        }
+        auto& [ idx, center_x, center_y ] = assigned_clusters[n];
+        idx = c_min;
+        center_x = s(c_min,0);
+        center_y = s(c_min,1);
+    });
+    
+    return assigned_clusters;
+}
+
 // reads a blaze matrix from whitespace separated text file
 template <typename T>
-void
-loadtxt(
-    const std::string& path,
-    blaze::DynamicMatrix<T, blaze::rowMajor>& x
-) {
+void loadtxt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& x) {
     std::cout << "reading file ";
     std::cout << path;
     std::cout << "... ";
@@ -102,16 +126,21 @@ loadtxt(
     std::cout << std::endl;
 }
 
+// write vector of size_t as a text file
+template <typename T>
+void savevec(const std::string& path, const std::vector<std::tuple<size_t,T,T>>& x) {
+    std::ofstream ofs(path);
+    for (const auto &e : x) {
+        auto [ idx, center_x, center_y ] = e;
+        ofs << idx << " " << center_x << " " << center_y << "\n";
+    }
+}
+
 // writes blaze matrix as a text file
 template <typename T>
-void
-savetxt(
-    const std::string& path,
-    const blaze::DynamicMatrix<T>& x
-) {
+void savetxt(const std::string& path, const blaze::DynamicMatrix<T>& x) {
     std::ofstream ofs(path);
 
-    ofs << std::scientific;
     for (size_t i = 0; i < x.rows(); i++) {
         for (size_t j = 0; j < x.columns(); j++) {
             ofs << x(i, j) << "\t";

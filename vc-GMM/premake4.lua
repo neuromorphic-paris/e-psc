@@ -1,8 +1,8 @@
-solution 'vc-GMM' 
+solution 'vc-GMM'
     configurations {'Release', 'Debug'}
     location 'build'
 
-    for index, file in pairs(os.matchfiles('source/*.cxx')) do
+    for index, file in pairs(os.matchfiles('applications/*.cpp')) do
     	local name = path.getbasename(file)
     	project(name)
     		-- General settings
@@ -10,34 +10,34 @@ solution 'vc-GMM'
     		language 'C++'
         	location 'build'
 
-			-- All files in source, third_party and applications
-        	files {'source/**.hxx',
-        		   'source/' .. name .. '.cxx'
+			-- All files in source and applications
+        	files {'source/**.hpp',
+        		   'applications/' .. name .. '.cpp'
         	}
 
 	        -- Declare the configurations
 	        configuration 'Release'
 	            targetdir 'build/release'
-	            defines {'NDEBUG'}
+	            defines {'NDEBUG','STATS_ENABLE_BLAZE_WRAPPERS'}
 	            flags {'OptimizeSpeed'}
 
 	        configuration 'Debug'
 	            targetdir 'build/debug'
-	            defines {'DEBUG'}
+	            defines {'DEBUG','STATS_ENABLE_BLAZE_WRAPPERS'}
 	            flags {'Symbols'}
 
 	        configuration 'linux or macosx'
             	includedirs {'/usr/local/include'}
-	        	libdirs {'/usr/local/lib'}
+	        	  libdirs {'/usr/local/lib'}
 
 	        -- Linux specific settings
 	        configuration 'linux'
-                links {'pthread'}
-	            buildoptions {'-std=c++14'}
-	           	linkoptions {'-std=c++14'}
+              links {'pthread'}
+	            buildoptions {'-std=c++17'}
+	           	linkoptions {'-std=c++17'}
 
 	        -- Mac OS X specific settings
 	        configuration 'macosx'
-	            buildoptions {'-std=c++14'}
-	           	linkoptions {'-std=c++14'}
+	            buildoptions {'-std=c++17'}
+	           	linkoptions {'-std=c++17'}
 end

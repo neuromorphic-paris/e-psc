@@ -20,17 +20,16 @@
 #include <limits>
 
 #include "blaze/Blaze.h"
-#include "threads.hxx"
+#include "threads.hpp"
 
 template <typename T>
 struct variational {
 	struct _tab {
 		size_t opc;
 		size_t ref;
-        _tab(void)
-            : opc(std::numeric_limits<size_t>::max())
-            , ref(std::numeric_limits<size_t>::max())
-        {}
+        _tab(void) :
+            opc(std::numeric_limits<size_t>::max()),
+            ref(std::numeric_limits<size_t>::max()){}
 	};
 	struct _dcn {
 		size_t clu;
@@ -41,9 +40,10 @@ struct variational {
 		size_t num;
 		T      key;
 	};
+    
     const blaze::DynamicMatrix<T, blaze::rowMajor>& data;
     const blaze::DynamicVector<T>& weight;
-	      blaze::DynamicMatrix<T, blaze::rowMajor>& mean;
+    blaze::DynamicMatrix<T, blaze::rowMajor>& mean;
 
     size_t N;
     size_t C;
@@ -74,17 +74,7 @@ struct variational {
 	T guess_variance(void);
 
 	variational(void) {};
-    variational(
- 		const blaze::DynamicMatrix<T, blaze::rowMajor>& data,
-        const blaze::DynamicVector<T>& weight,
-              blaze::DynamicMatrix<T, blaze::rowMajor>& mean,
-        size_t K,
-        size_t G,
-        bool p1,
-		T variance,
-        size_t nthreads,
-		size_t seed
-    );
+    variational(const blaze::DynamicMatrix<T, blaze::rowMajor>& data, const blaze::DynamicVector<T>& weight, blaze::DynamicMatrix<T, blaze::rowMajor>& mean, size_t K, size_t G, bool p1, T variance, size_t nthreads, size_t seed);
 
     size_t estep(void);
     void fit(void);
@@ -99,9 +89,7 @@ variational<T>::guess_variance(void)
 }
 
 template <typename T>
-size_t
-variational<T>::estep(void)
-{
+size_t variational<T>::estep(void) {
 	size_t count = expectation();
     estimate();
 
@@ -109,34 +97,24 @@ variational<T>::estep(void)
 }
 
 template <typename T>
-variational<T>::variational(
-    const blaze::DynamicMatrix<T, blaze::rowMajor>& data,
-    const blaze::DynamicVector<T>& weight,
-          blaze::DynamicMatrix<T, blaze::rowMajor>& mean,
-    size_t K,
-    size_t G,
-    bool p1,
-    T variance,
-	size_t nthreads,
-	size_t seed)
-    : data(data)
-    , weight(weight)
-    , mean(mean)
-    , N(data.rows())
-    , C(mean.rows())
-    , D(mean.columns())
-    , K(K)
-    , G(G)
-    , Qn(N, K)
-    , Dc(N, std::min(K * G, C) + p1)
-    , Gc(C, G)
-    , Ps(N)
-    , Op(N)
-    , mt(nthreads)
-	, threads(nthreads)
-    , p1(p1)
-    , variance(variance)
-{
+variational<T>::variational(const blaze::DynamicMatrix<T, blaze::rowMajor>& data, const blaze::DynamicVector<T>& weight, blaze::DynamicMatrix<T, blaze::rowMajor>& mean, size_t K, size_t G, bool p1, T variance, size_t nthreads, size_t seed) :
+        data(data),
+        weight(weight),
+        mean(mean),
+        N(data.rows()),
+        C(mean.rows()),
+        D(mean.columns()),
+        K(K),
+        G(G),
+        Qn(N, K),
+        Dc(N, std::min(K * G, C) + p1),
+        Gc(C, G),
+        Ps(N),
+        Op(N),
+        mt(nthreads),
+        threads(nthreads),
+        p1(p1),
+        variance(variance) {
 	for (std::size_t t = 0; t < threads.size(); t++) {
 		std::seed_seq seq{seed + t};
 		mt[t][0].seed(seq);
@@ -191,8 +169,7 @@ void variational<T>::init_Kn(void)
 		blaze::DynamicVector<_tab>(C)
 	);
 
-    threads.parallel(N, [&] (size_t n, size_t t)
-	-> void {
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
 		std::uniform_int_distribution<size_t> uniform_C(0, C - 1);
 		for (auto& it : row(Qn, n)) {
 			size_t u;
@@ -236,9 +213,7 @@ void variational<T>::init_Gc(void)
 }
 
 template <typename T>
-void
-variational<T>::estimate(void)
-{
+void variational<T>::estimate(void) {
     auto tab = std::vector<blaze::DynamicVector<_tab>>(
 		threads.size(),
 		blaze::DynamicVector<_tab>(C)
@@ -256,8 +231,7 @@ variational<T>::estimate(void)
 		inverse[Op[n]].push_back(n);
 	}
 
-	threads.parallel(C, [&] (size_t c, size_t t)
-	-> void {
+	threads.parallel(C, [&] (size_t c, size_t t) -> void {
 		size_t inc = 0;
 		for (auto& n : inverse[c]) {
 			for (auto& it : subvector(row(Dc, n), 0, Ps[n])) {
@@ -307,9 +281,7 @@ variational<T>::estimate(void)
 }
 
 template <typename T>
-size_t
-variational<T>::expectation(void)
-{
+size_t variational<T>::expectation(void) {
     using blaze::row;
 
     auto tab = std::vector<blaze::DynamicVector<_tab>>(
@@ -325,8 +297,7 @@ variational<T>::expectation(void)
 		std::array<T, 64>{}
 	);
 
-    threads.parallel(N, [&] (size_t n, size_t t)
-	-> void {
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
 		size_t count = 0;
         for (auto& k : row(Qn, n)) {
             for (auto& c : row(Gc, k.clu)) {
@@ -357,8 +328,7 @@ variational<T>::expectation(void)
 			row(Dc, n).begin(),
 			row(Dc, n).begin() + K,
 			row(Dc, n).begin() + Ps[n],
-			[&] (auto& lhs, auto& rhs)
-			-> bool {
+			[&] (auto& lhs, auto& rhs) -> bool {
 				return lhs.key < rhs.key;
 			}
 		);
@@ -416,9 +386,7 @@ variational<T>::expectation(void)
 }
 
 template <typename T>
-void
-variational<T>::fit(void)
-{
+void variational<T>::fit(void) {
     using blaze::sqrNorm;
     using blaze::row;
 
@@ -435,8 +403,7 @@ variational<T>::fit(void)
 		std::array<T, 64>{}
 	);
 
-    threads.parallel(N, [&] (size_t n, size_t t)
-	-> void {
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
 		for (size_t k = 0; k < K; k++) {
 
 			size_t c = Qn(n, k).clu;
@@ -464,8 +431,7 @@ variational<T>::fit(void)
 
 	(*this).mean = _mean[0];
 
-    threads.parallel(N, [&] (size_t n, size_t t)
-	-> void {
+    threads.parallel(N, [&] (size_t n, size_t t) -> void {
 		for (size_t k = 0; k < K; k++) {
 
 			size_t c = Qn(n, k).clu;

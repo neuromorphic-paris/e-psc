@@ -19,15 +19,13 @@
 #include "blaze/Blaze.h"
 
 // implements lightweight coreset construction for k-means
+// x      - dataset
+// c      - coreset
+// w      - weights
+// N_core - size of subset
+// mt     - random number generator
 template <typename T>
-void
-lwcs(
-	const blaze::DynamicMatrix<T, blaze::rowMajor>& x,	// dataset
-	      blaze::DynamicMatrix<T, blaze::rowMajor>& c,	// coreset
-	      blaze::DynamicVector<T>& w,					// weights
-	size_t N_core,
-    std::mt19937_64& mt									// random number generator
-) {
+void lwcs(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, blaze::DynamicMatrix<T, blaze::rowMajor>& c, blaze::DynamicVector<T>& w, size_t N_core, std::mt19937_64& mt) {
     using blaze::sqrNorm;
     using blaze::row;
 
