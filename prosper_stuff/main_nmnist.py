@@ -8,8 +8,9 @@ from utils.Time_Surface_generators import Time_Surface_all, Time_Surface_event
 
 from prosper.em import EM
 from prosper.em.annealing import LinearAnnealing
-from prosper.em.camodels.bsc_et import BSC_ET
-from prosper.em.camodels.dbsc_et import DBSC_ET
+from prosper.em.camodels.dsc_et import DSC_ET
+#from prosper.em.camodels.bsc_et import BSC_ET
+#from prosper.em.camodels.dbsc_et import DBSC_ET
 from prosper.utils import create_output_path
 from prosper.utils.datalog import dlog, StoreToH5, TextPrinter, StoreToTxt
 import tables as tb
@@ -30,8 +31,8 @@ print(sys.version_info)
 
 learning = False  # Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
-resume  = True
-ts_size = 13  # size of the time surfaces
+resume  = False #True
+ts_size = 11  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
@@ -48,7 +49,8 @@ to_scatter_train = None
 to_scatter_test = None
 if comm.rank == 0:
     #fh = tb.open_file("../datasets/nmnist_small.h5")
-    fh = tb.open_file("../datasets/nmnist_one_saccade.h5")
+    fh = tb.open_file("../../../datasets/nmnist_one_saccade.h5")
+    #fh = tb.open_file("../datasets/nmnist_one_saccade.h5")
     #fh = tb.open_file("../datasets/nmnist.h5")
     dtr = [d.read().astype(np.int32) for d in fh.root.train]
     dte = [d.read().astype(np.int32) for d in fh.root.test]
@@ -128,19 +130,20 @@ comm.barrier()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
 if learning:
     # Dimensionality of the model
-    H = 500     # let's start with 100
+    H = 1000     # let's start with 100
     D = ts_size**2    # dimensionality of observed data
 
     # Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
     Hprime = 5
     gamma = 3
+    states = np.array([0,1])
 
     # Import and instantiate a model
     discriminative = False
     if discriminative:
         model = DBSC_ET(D, H, Hprime, gamma)
     else:
-        model = BSC_ET(D, H, Hprime, gamma)
+        model = DSC_ET(D, H, Hprime, gamma, states=states)
 
     # Configure DataLogger
     print_list = ('T', 'L', 'pi', 'sigma')
@@ -154,7 +157,7 @@ if learning:
 
     # Choose annealing schedule
     from prosper.em.annealing import LinearAnnealing
-    anneal = LinearAnnealing(20)  # decrease
+    anneal = LinearAnnealing(50)  # decrease
     anneal['T'] = [(0, 5.), (.8, 1.)]
     anneal['Ncut_factor'] = [(0, 0.), (0.5, 0.), (0.6, 1.)]
     # anneal['Ncut_factor'] = [(0,0.),(0.7,1.)]
@@ -194,13 +197,14 @@ if resume:
     # (It has to be Hprime>=gamma)
     Hprime = 5
     gamma = 3
+    states = np.array([0,1])
 
     # Import and instantiate a model
     discriminative = False
     if discriminative:
         model = DBSC_ET(D, H, Hprime, gamma)
     else:
-        model = BSC_ET(D, H, Hprime, gamma)
+        model = DSC_ET(D, H, Hprime, gamma, states=states)
     model_params = {"W": W, "pi": pi, "sigma": sigma}
 
     # Choose annealing schedule
