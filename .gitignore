@@ -32,3 +32,11 @@ vc-GMM/build/
 vc-GMM/poker_ts_test.txt
 
 vc-GMM/poker_ts_train.txt
+
+vc-GMM/cluster_centers.txt
+
+vc-GMM/features/
+
+vc-GMM/source/StatsLib/
+
+vc-GMM/gmm_centers.txt
