@@ -82,13 +82,14 @@ for recording in range(len(dtr)):
                    dtr[recording][:, 1:3].astype(np.int),
                    dtr[recording][:, 3].astype(np.int)-1]
 
-        time_surface = Time_Surface_event(xdim=ts_size,
-                                          ydim=ts_size,
-                                          event=single_event,
-                                          timecoeff=tau,
-                                          dataset=dataset,
-                                          num_polarities=polarities,
-                                          verbose=False)
+        #time_surface = Time_Surface_event(xdim=ts_size,
+        #                                  ydim=ts_size,
+        #                                  event=single_event,
+        #                                  timecoeff=tau,
+        #                                  dataset=dataset,
+        #                                  num_polarities=polarities,
+        #                                  verbose=False)
+        time_surface=np.random.rand(ts_size,ts_size)
         ts.append(time_surface)
         train_labels.append(int(dtr[recording][k, -1]))
         # idx += 1
@@ -112,13 +113,14 @@ for recording in range(len(dte)):
         dataset = [dte[recording][:, 0].astype(np.int),
                    dte[recording][:, 1:3].astype(np.int),
                    dte[recording][:, 3].astype(np.int)-1]
-        time_surface = Time_Surface_event(xdim=ts_size,
-                                          ydim=ts_size,
-                                          event=single_event,
-                                          timecoeff=tau,
-                                          dataset=dataset,
-                                          num_polarities=polarities,
-                                          verbose=False)
+        #time_surface = Time_Surface_event(xdim=ts_size,
+        #                                  ydim=ts_size,
+        #                                  event=single_event,
+        #                                  timecoeff=tau,
+        #                                  dataset=dataset,
+        #                                  num_polarities=polarities,
+        #                                  verbose=False)
+        time_surface=np.random.rand(ts_size,ts_size)
         ts_test.append(time_surface)
         test_labels.append(int(dte[recording][k, -1]))
     test_rec_sizes.append(dte[recording].shape[0])
@@ -223,11 +225,6 @@ if resume:
 
 if classification:
 
-    # my_train_data = {'y': ts}
-    # pp(Hprime,gamma)
-    # res_train = model.inference(anneal, model_params, my_train_data,
-                                # Hprime_max=Hprime, gamma_max=gamma)
-
     train_features=[]
     train_labels2=[]
     start=0
@@ -239,6 +236,7 @@ if classification:
         pp(allranks,0)
 
     try:
+        pp("Process: {:04} handles {:6} datapoints".format(comm.rank,sum(train_rec_sizes)))
         for i in range(len(train_rec_sizes)):
             stop = start + train_rec_sizes[i]
 
@@ -247,93 +245,116 @@ if classification:
             #                        Hprime_max=Hprime, gamma_max=gamma)
 
             #train_features.append(res_train['s'][:, 0, :].mean(0))
-            train_features.append(np.random.rand(H))
-            
+            x = np.random.rand(stop-start,H)
+            train_features.append(x.mean(0))
+            assert np.isfinite(train_features).all()
             assert type(train_features[-1])==np.ndarray
             assert train_features[-1].shape[0]==H
             this_l = train_labels[start:stop]
             assert (this_l == this_l[0]).all()
             train_labels2.append(this_l[0])
             start = stop
-            #if (comm.rank%13)==0:
-            #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
-            #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
-            #if (comm.rank)==1:
-            #    pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
-            #          "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
             if i==(len(train_rec_sizes)-1):
+                pp("Train: {:04} min: {} max: {}".format(comm.rank,np.min(train_features),np.max(train_features)))
                 pp(("TRAIN: {:04}".format(comm.rank) , ": {:.04}%".format(100.*(i+1)/len(train_rec_sizes)),
                       "size {} -> {}".format(my_train_data['y'].shape[0],train_rec_sizes[i])))
     except AssertionError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except AttributeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except EOFError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except FloatingPointError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except ImportError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except IndexError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except KeyError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except MemoryError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except NameError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except NotImplementedError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except OSError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except OverflowError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except ReferenceError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except RuntimeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except SyntaxError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except IndentationError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except TabError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except SystemError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except TypeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except UnboundLocalError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except UnicodeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except UnicodeEncodeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except UnicodeDecodeError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except UnicodeTranslateError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except ValueError as e:
-        pp(e)    
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except ZeroDivisionError as e:
-        pp(e)
+        pp("Error: {} thrown by: {}".format(e,comm.rank))
+        raise e
     except:
-        pp("Error thrown by {:04}".format(comm.rank))
-    finally:
-        pp("Error was not caught by {:04}".format(comm.rank))
+        pp("Unknown error thrown by {:04}".format(comm.rank))
+        raise e
         #break
     pp("MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,len(train_features),len(train_labels2)))
     train_features = np.array(train_features).tolist()
     train_labels = np.array(train_labels2).tolist()
-    #pp("Numpy MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,train_features[0].shape,train_labels[0].shape))
     if comm.rank==0:
         pp("#"*40)
+    time.sleep(comm.rank+1)
     pp(comm.rank)
-    allranks = comm.gather(comm.rank)
+    #allranks = comm.gather(comm.rank)
+    allranks = np.zeros((comm.Get_size(),2),dtype='i')
+    comm.Gather(np.array([comm.rank,1],dtype='i'),allranks,root=0)
     if comm.rank==0:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
         pp(("2nd ranks that have not finished bussiness ", notincluded))
         pp(allranks)
-    
+
     train_features_labels = comm.gather((train_features, train_labels))
 
     if comm.rank == 0:
@@ -376,7 +397,7 @@ if classification:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
         pp(("4th ranks that have not finished bussiness ", notincluded))
         pp(allranks)
-        
+    
     test_features_labels = comm.gather((test_features, test_labels))
     if comm.rank == 0:
         pp("Start Classifying")

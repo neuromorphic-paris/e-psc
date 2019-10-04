@@ -21,15 +21,21 @@ import os, sys
 comm = MPI.COMM_WORLD
 
 nprocs = comm.size
-#print("running {} parallel processes".format(nprocs))
-print(sys.version_info)
 
+def pp(msg,rank=-1,comm=comm):
+    if rank==-1:
+        print(msg)
+        sys.stdout.flush()
+    elif comm.rank==rank:
+        print(msg)
+        sys.stdout.flush()
 
-
+#pp("running {} parallel processes".format(nprocs))
+pp(sys.version_info,0)
 
 # PARAMETERS ####
 
-learning = False  # Decide whether to run the sparse coding algorithm
+learning = True# Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
 resume  = False #True
 ts_size = 11  # size of the time surfaces
@@ -43,7 +49,7 @@ else:
 
 dtr = None
 dte = None
-#print("rank: ", comm.rank)
+#pp("rank: ", comm.rank)
 
 to_scatter_train = None
 to_scatter_test = None
@@ -61,7 +67,7 @@ if comm.rank == 0:
 #import ipdb;ipdb.set_trace()
 dtr = comm.scatter(to_scatter_train)
 dte = comm.scatter(to_scatter_test)
-print("rank: ", comm.rank, len(dtr), len(dte))
+pp("1st rank: {}, len(dtr): {}, len(dte): {}".format(comm.rank, len(dtr), len(dte)))
 sys.stdout.flush()
 # number_of_samples = sum(sizes_of_train_samples)
 
@@ -95,7 +101,7 @@ train_labels = np.array(train_labels)
 # ts_res = ts.shape[0] % comm.size
 # ts = ts[:-ts_res]
 # train_labels = train_labels[:-ts_res]
-# print(len(train_labels))
+# pp(len(train_labels))
 
 ts_test = []
 test_labels = []
@@ -124,7 +130,7 @@ test_labels = np.array(test_labels)
 # ts_test_res = ts_test.shape[0] % comm.size
 # ts_test = ts_test[:-ts_test_res]
 # test_labels = test_labels[:-ts_test_res]
-print("rank: ", comm.rank, ts.shape, train_labels.shape)
+pp("2nd rank: {}, ts.shape: {}, train_labels.shape: {}".format(comm.rank, ts.shape, train_labels.shape))
 sys.stdout.flush()
 comm.barrier()
 #### RUNNING THE SPARSE CODING ALGORITHM ####
@@ -134,7 +140,7 @@ if learning:
     D = ts_size**2    # dimensionality of observed data
 
     # Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
-    Hprime = 5
+    Hprime = 4
     gamma = 3
     states = np.array([0,1])
 
@@ -169,12 +175,12 @@ if learning:
     assert train_labels.shape[0] == ts.shape[0]
     my_data = {'y': ts, 'l': train_labels}
     model_params = model.standard_init(my_data)
-    print("model defined")
+    pp("model defined",0)
     em = EM(model=model, anneal=anneal)
     em.data = my_data
     em.lparams = model_params
-    em.run()
-    print("em finished")
+    em.run(verbose=True)
+    pp("em finished",0)
 
     my_test_data = {'y': ts_test}
     res = model.inference(anneal, em.lparams, my_test_data)
@@ -195,7 +201,7 @@ if resume:
 
     # Approximation parameters for Expectation Truncation
     # (It has to be Hprime>=gamma)
-    Hprime = 5
+    Hprime = 4
     gamma = 3
     states = np.array([0,1])
 
@@ -222,7 +228,7 @@ if resume:
 if classification:
 
     my_train_data = {'y': ts}
-    print(Hprime,gamma)
+    pp(Hprime,gamma)
     res_train = model.inference(anneal, model_params, my_train_data,
                                 Hprime_max=Hprime, gamma_max=gamma)
 
@@ -273,7 +279,7 @@ if classification:
         predicted_labels = lreg.predict(test_features)
 
         test_labels = np.array(test_labels)
-        print("Classification report for classifier %s:\n%s\n"
+        pp("Classification report for classifier %s:\n%s\n"
               % (lreg, metrics.classification_report(test_labels, predicted_labels)))
-        print("Confusion matrix:\n%s" %
+        pp("Confusion matrix:\n%s" %
               metrics.confusion_matrix(test_labels, predicted_labels))
