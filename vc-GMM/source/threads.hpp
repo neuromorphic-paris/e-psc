@@ -45,20 +45,18 @@ public:
     size_t size(void);
 };
 
-tp::tp(size_t nthreads)
-    : threads()
-    , nthreads(nthreads)
-    , cap(0)
-    , ret(0)
-{
+tp::tp(size_t nthreads) :
+    threads(),
+    nthreads(nthreads),
+    cap(0),
+    ret(0) {
     for (size_t t = 0; t < nthreads; t++) {
         threads.push_back(std::thread(&tp::loop, this));
     }
     wait();
 }
 
-tp::~tp()
-{
+tp::~tp() {
     call = nullptr;
     args = nullptr;
 
@@ -68,17 +66,14 @@ tp::~tp()
     }
 }
 
-void
-tp::loop(void)
-{
+void tp::loop(void) {
     size_t t;
     {
         std::lock_guard<std::mutex> lock(m);
         t = cap++;
     }
 
-    while (true)
-    {
+    while (true) {
         {
             std::unique_lock<std::mutex> lock(m);
             ret++;
@@ -96,9 +91,7 @@ tp::loop(void)
     }
 }
 
-void
-tp::wait()
-{
+void tp::wait() {
     std::unique_lock<std::mutex> lock(m);
     while (ret < nthreads) {
         w.wait(lock);
@@ -106,9 +99,7 @@ tp::wait()
 }
 
 template <class L>
-void
-tp::wrap(size_t t)
-{
+void tp::wrap(size_t t) {
     size_t delta = (cap + nthreads - 1) / nthreads;
     size_t from  = t * delta;
     size_t to    = (t + 1) * delta;
@@ -120,9 +111,7 @@ tp::wrap(size_t t)
 
 
 template <class L>
-void
-tp::parallel(size_t tasks, const L& immu)
-{
+void tp::parallel(size_t tasks, const L& immu) {
     call = &tp::wrap<L>;
     args = &immu;
 
@@ -134,9 +123,7 @@ tp::parallel(size_t tasks, const L& immu)
     wait();
 }
 
-size_t
-tp::size(void)
-{
+size_t tp::size(void) {
     return nthreads;
 }
 
