@@ -54,14 +54,14 @@ T quantization(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::D
 // x - dataset
 // s - cluster centers
 template <typename T>
-std::vector<std::tuple<size_t,T,T>> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
+std::vector<size_t> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x, const blaze::DynamicMatrix<T, blaze::rowMajor>& s, tp& threads) {
     size_t N = x.rows();
     size_t C = s.rows();
     
-    std::vector<std::tuple<size_t,T,T>> assigned_clusters(x.rows(), std::make_tuple(0, 0, 0));
+    std::vector<size_t> assigned_clusters(x.rows(), 0);
     threads.parallel(N, [&] (size_t n, size_t t) -> void {
         T d2 = std::numeric_limits<T>::max();
-        size_t c_min = std::numeric_limits<T>::max();
+        size_t c_min = std::numeric_limits<size_t>::max();
         
         // find the cluster with the lowest quantization error
         for (size_t c = 0; c < C; c++) {
@@ -71,10 +71,7 @@ std::vector<std::tuple<size_t,T,T>> inference(const blaze::DynamicMatrix<T, blaz
                 c_min = c;
             }
         }
-        auto& [ idx, center_x, center_y ] = assigned_clusters[n];
-        idx = c_min;
-        center_x = s(c_min,0);
-        center_y = s(c_min,1);
+        assigned_clusters[N] = c_min;
     });
     
     return assigned_clusters;
@@ -127,12 +124,10 @@ void loadtxt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& 
 }
 
 // write vector of size_t as a text file
-template <typename T>
-void savevec(const std::string& path, const std::vector<std::tuple<size_t,T,T>>& x) {
+void savevec(const std::string& path, const std::vector<size_t>& x) {
     std::ofstream ofs(path);
-    for (const auto &e : x) {
-        auto [ idx, center_x, center_y ] = e;
-        ofs << idx << " " << center_x << " " << center_y << "\n";
+    for (const auto& index : x) {
+        ofs << index << "\n";
     }
 }
 

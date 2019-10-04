@@ -16,7 +16,7 @@ from prosper.utils.datalog import dlog, StoreToH5, TextPrinter, StoreToTxt
 import tables as tb
 from mpi4py import MPI
 
-import os, sys
+import os, sys, shutil
 
 comm = MPI.COMM_WORLD
 
@@ -239,6 +239,7 @@ if classification:
         pp(allranks,0)
 
     try:
+        pp("Process: {:04} handles {:6} datapoints".format(comm.rank,sum(train_rec_sizes)))
         for i in range(len(train_rec_sizes)):
             stop = start + train_rec_sizes[i]
 
@@ -320,27 +321,48 @@ if classification:
         pp("Unknown error thrown by {:04}".format(comm.rank))
         #break
     pp("MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,len(train_features),len(train_labels2)))
-    train_features = np.array(train_features).tolist()
-    train_labels = np.array(train_labels2).tolist()
+    train_features = np.array(train_features)#.tolist()
+    train_labels = np.array(train_labels2)#.tolist()
+    #if not os.path.exists("_tmp_train"):
+    #    os.mkdir("_tmp_train")
+    #np.savez("_tmp_train/_tmp_feat_lab_{:04}.npz".format(comm.rank),train_features=train_features,train_labels=train_labels)
     #pp("Numpy MyRank {:04}, size feat: {}, size labels: {} ".format(comm.rank,train_features[0].shape,train_labels[0].shape))
     if comm.rank==0:
         pp("#"*40)
-    pp(comm.rank)
-    allranks = comm.gather(comm.rank)
-    if comm.rank==0:
-        notincluded = [ n for n in range(comm.size) if n not in allranks]
-        pp(("2nd ranks that have not finished bussiness ", notincluded))
-        pp(allranks)
+    pp("{:04}".format(comm.rank))
+    #allranks = np.zeros((comm.Get_size(),2),dtype='i')
+    #comm.Gather(np.array([comm.rank,1],dtype='i'),allranks,root=0)
+    #if comm.rank==0:
+    #    notincluded = [ n for n in range(comm.size) if n not in allranks]
+    #    pp(("2nd ranks that have not finished bussiness ", notincluded))
+    #    pp(allranks)
 
-    train_features_labels = comm.gather((train_features, train_labels))
+    train_features_labels = comm.gather([train_features, train_labels])
+    #train_features_labels = comm.allgather((train_features, train_labels))
+    #train_features_labels = train_features_labels if comm.rank==0 else None
+    #all_train_features = np.zeros((nprocs*train_features.shape[0],train_features.shape[1])) if comm.rank==0 else None
+    #all_train_labels= np.zeros((nprocs*train_labels.shape[0],)) if comm.rank==0 else None
+    #comm.Gather(train_features, all_train_features)
+    #comm.Gather(train_labels, all_train_labels)
 
     if comm.rank == 0:
-        pp("parsing features and labels")
+    #    pp("parsing features and labels")
+    #    while os.listdir("_tmp_train")!=nprocs:
+    #        time.sleep(10)
+    #        pp("Waiting for processes to write all data")
+    #    train_features_labels=[]
+    #    for f in sorted(os.listdir("_tmp_train")):
+    #        fl = np.load(f)
+    #        train_features_labels.append((fl['train_features'],fl['train_labels']))
         train_features = np.concatenate([f[0] for f in train_features_labels])
         train_labels = np.concatenate([f[1] for f in train_features_labels])
+
         pp("saving to npz")
+        shutil.rmtree("_tmp_train")
         np.savez(output_path+'/map_features_labels.npz',train_features=train_features, train_labels=train_labels)
 
+    while os.path.exists("_tmp_train"):
+        time.sleep(1)
     allranks = comm.gather(comm.rank)
     if comm.rank==0:
         notincluded = [ n for n in range(comm.size) if n not in allranks]
