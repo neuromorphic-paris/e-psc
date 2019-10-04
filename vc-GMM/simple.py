@@ -1,4 +1,5 @@
 # simple.py
+# IMPORTANT:ONLY WORKS WITH THE GMM_branch branch on the github (the inference function is different)
 
 # Created by Omar Oubari.
 # Email: omar.oubari@inserm.fr
