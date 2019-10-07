@@ -34,6 +34,9 @@ int main(int argc, char** argv) {
         // READING DATA
         blaze::DynamicMatrix<double, blaze::rowMajor> train_features;
         loadtxt(path_train_features, train_features); // read training dataset
+
+        blaze::DynamicMatrix<double, blaze::rowMajor> train_features2;
+        loadtxt(path_train_features, train_features2); // read training dataset
         
         blaze::DynamicMatrix<double, blaze::rowMajor> test_features;
         loadtxt(path_test_features, test_features); // read test dataset
@@ -42,7 +45,7 @@ int main(int argc, char** argv) {
         clustering<double> vc_GMM(train_features, N_core, C, chain_length, C_p, G, plus1, nthreads, seed);
 
         vc_GMM.converge(convergence_threshold); // computes EM-iterations until the relative change in free energy falls below the convergence threshold
-        auto training_assignments = vc_GMM.predict(); // returns the cluster assignments for the train dataset
+        auto training_assignments = vc_GMM.predict(train_features2); // returns the cluster assignments for the train dataset
         auto test_assignments = vc_GMM.predict(test_features); // returns the cluster assignments for the test dataset
         
         // writing the cluster centers to a text file

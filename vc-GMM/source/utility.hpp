@@ -71,7 +71,7 @@ std::vector<size_t> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x,
                 c_min = c;
             }
         }
-        assigned_clusters[N] = c_min;
+        assigned_clusters[n] = c_min;
     });
     
     return assigned_clusters;
