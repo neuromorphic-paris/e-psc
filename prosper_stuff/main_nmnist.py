@@ -3,8 +3,8 @@ import prosper
 import numpy as np
 from scipy.stats import truncnorm
 
-from utils.Cards_loader import Cards_loader
-from utils.Time_Surface_generators import Time_Surface_all, Time_Surface_event
+from ..utils.Cards_loader import Cards_loader
+from ..utils.Time_Surface_generators import Time_Surface_all, Time_Surface_event
 
 from prosper.em import EM
 from prosper.em.annealing import LinearAnnealing
@@ -38,7 +38,7 @@ pp(sys.version_info,0)
 learning = True# Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
 resume  = False #True
-ts_size = 11  # size of the time surfaces
+ts_size = 13  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
