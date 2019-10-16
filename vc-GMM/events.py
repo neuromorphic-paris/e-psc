@@ -16,15 +16,15 @@ import matplotlib.pyplot as plt
 
 #### PARAMETERS ####
 
-create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
+create_features = True; # choose whether to import the dataset and create time surfaces or load from an existing npy file
 save_astxt = True # choose to save the features as a .txt file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
-C=5
+C=10000
 create_histograms = True
 
 gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
-ts_size = 13  # size of the time surfaces
+ts_size = 11  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
@@ -158,10 +158,11 @@ if vc_gmm_clustering:
     cmd_list = ["build/release/events",        # path to the C++ executable for clustering
                 "features/poker_ts_train.txt", # path to the training features (saved in a text file)
                 "features/poker_ts_test.txt",  # path to the test features (saved in a text file)
-                "5",                           # int - C_p - number of clusters considered for each data point
-                "5",                           # int - G - search space (nearest neighbours for the C' clusters)
+                "100",                           # int - C_p - number of clusters considered for each data point
+                "100",                           # int - G - search space (nearest neighbours for the C' clusters)
                 "1",                           # bool - plus1 - include one additional randomly chosen cluster
-                "10000",                       # int - N_core - size of subset
+                # str(ts_train.shape[0]),                       # int - N_core - size of subset
+                "152859",                       # int - N_core - size of subset
                 str(C),                         # int - C - number of cluster centers
                 "5",                          # int - chain_length - chain length for AFK-MC² seeding
                 "0.0001",                      # float - convergence_threshold
@@ -201,6 +202,8 @@ if create_histograms:
     assert tedpt.sum()==tel.shape[0]
 
     # C=200
+
+    ### Training Features ####
     train_labels = []
     start = 0 
     trfeats = []
@@ -223,6 +226,7 @@ if create_histograms:
     number_of_samples = sum(sizes_of_testing_samples)
     ts_test = np.zeros((number_of_samples, ts_size, ts_size))
 
+    ### Testing Features ####
     test_labels = []
     start = 0 
     stop = 0
