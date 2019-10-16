@@ -3,8 +3,10 @@ import prosper
 import numpy as np
 from scipy.stats import truncnorm
 
-from ..utils.Cards_loader import Cards_loader
-from ..utils.Time_Surface_generators import Time_Surface_all, Time_Surface_event
+import sys
+sys.path.append("..")
+from utils.Cards_loader import Cards_loader
+from utils.Time_Surface_generators import Time_Surface_all, Time_Surface_exp
 
 from prosper.em import EM
 from prosper.em.annealing import LinearAnnealing
@@ -33,6 +35,10 @@ def pp(msg,rank=-1,comm=comm):
 #pp("running {} parallel processes".format(nprocs))
 pp(sys.version_info,0)
 
+def shinfo(x):
+    nx = x.copy()+1e-10
+    nx/=nx.sum()
+    return (-nx*np.log2(nx)).sum()
 # PARAMETERS ####
 
 learning = True# Decide whether to run the sparse coding algorithm
@@ -77,6 +83,7 @@ ts = []
 train_labels = []
 train_rec_sizes = []
 for recording in range(len(dtr)):
+    idx=0
     for k in range(dtr[recording].shape[0]):
         single_event = [dtr[recording][k, 0].astype(np.int),
                         dtr[recording][k, 1:3].astype(np.int)]
@@ -84,17 +91,18 @@ for recording in range(len(dtr)):
                    dtr[recording][:, 1:3].astype(np.int),
                    dtr[recording][:, 3].astype(np.int)-1]
 
-        time_surface = Time_Surface_event(xdim=ts_size,
+        time_surface = Time_Surface_exp(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
                                           timecoeff=tau,
                                           dataset=dataset,
                                           num_polarities=polarities,
                                           verbose=False)
-        ts.append(time_surface)
-        train_labels.append(int(dtr[recording][k, -1]))
-        # idx += 1
-    train_rec_sizes.append(dtr[recording].shape[0])
+        if shinfo(time_surface)>3:
+            ts.append(time_surface)
+            train_labels.append(int(dtr[recording][k, -1]))
+        idx += 1
+    train_rec_sizes.append(idx)
 ts = np.array(ts)
 ts = ts.reshape((ts.shape[0], -1))
 train_labels = np.array(train_labels)
@@ -107,6 +115,7 @@ ts_test = []
 test_labels = []
 test_rec_sizes = []
 for recording in range(len(dte)):
+    idx= 0 
     for k in range(dte[recording].shape[0]):
 
         single_event = [dte[recording][k, 0].astype(np.int),
@@ -114,15 +123,17 @@ for recording in range(len(dte)):
         dataset = [dte[recording][:, 0].astype(np.int),
                    dte[recording][:, 1:3].astype(np.int),
                    dte[recording][:, 3].astype(np.int)-1]
-        time_surface = Time_Surface_event(xdim=ts_size,
+        time_surface = Time_Surface_exp(xdim=ts_size,
                                           ydim=ts_size,
                                           event=single_event,
                                           timecoeff=tau,
                                           dataset=dataset,
                                           num_polarities=polarities,
                                           verbose=False)
-        ts_test.append(time_surface)
-        test_labels.append(int(dte[recording][k, -1]))
+        if shinfo(time_surface)>3:
+            ts_test.append(time_surface)
+            test_labels.append(int(dte[recording][k, -1]))
+        idx += 1
     test_rec_sizes.append(dte[recording].shape[0])
 ts_test = np.array(ts_test)
 ts_test = ts_test.reshape((ts_test.shape[0], -1))
