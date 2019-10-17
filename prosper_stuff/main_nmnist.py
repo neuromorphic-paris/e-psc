@@ -190,6 +190,7 @@ if learning:
     em = EM(model=model, anneal=anneal)
     em.data = my_data
     em.lparams = model_params
+    pp("em defined",0)
     em.run(verbose=True)
     pp("em finished",0)
 

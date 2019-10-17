@@ -16,11 +16,11 @@ import matplotlib.pyplot as plt
 
 #### PARAMETERS ####
 
-create_features = True; # choose whether to import the dataset and create time surfaces or load from an existing npy file
+create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
 save_astxt = True # choose to save the features as a .txt file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
-C=10000
+C=16
 create_histograms = True
 
 gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
@@ -158,11 +158,11 @@ if vc_gmm_clustering:
     cmd_list = ["build/release/events",        # path to the C++ executable for clustering
                 "features/poker_ts_train.txt", # path to the training features (saved in a text file)
                 "features/poker_ts_test.txt",  # path to the test features (saved in a text file)
-                "100",                           # int - C_p - number of clusters considered for each data point
-                "100",                           # int - G - search space (nearest neighbours for the C' clusters)
+                "4",                           # int - C_p - number of clusters considered for each data point
+                "4",                           # int - G - search space (nearest neighbours for the C' clusters)
                 "1",                           # bool - plus1 - include one additional randomly chosen cluster
                 # str(ts_train.shape[0]),                       # int - N_core - size of subset
-                "152859",                       # int - N_core - size of subset
+                "2000",                       # int - N_core - size of subset
                 str(C),                         # int - C - number of cluster centers
                 "5",                          # int - chain_length - chain length for AFK-MC² seeding
                 "0.0001",                      # float - convergence_threshold
