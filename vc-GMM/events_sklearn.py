@@ -160,8 +160,8 @@ if vc_gmm_clustering:
     cmd_list = ["build/release/events",        # path to the C++ executable for clustering
                 "features/poker_ts_train.txt", # path to the training features (saved in a text file)
                 "features/poker_ts_test.txt",  # path to the test features (saved in a text file)
-                "4",                           # int - C_p - number of clusters considered for each data point
-                "4",                           # int - G - search space (nearest neighbours for the C' clusters)
+                "10",                           # int - C_p - number of clusters considered for each data point
+                "10",                           # int - G - search space (nearest neighbours for the C' clusters)
                 "1",                           # bool - plus1 - include one additional randomly chosen cluster
                 # str(ts_train.shape[0]),                       # int - N_core - size of subset
                 "2000",                       # int - N_core - size of subset

@@ -16,11 +16,11 @@ import matplotlib.pyplot as plt
 
 #### PARAMETERS ####
 
-create_features = True; # choose whether to import the dataset and create time surfaces or load from an existing npy file
+create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
 save_astxt = True # choose to save the features as a .txt file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
-C=16
+C=100
 create_histograms = True
 
 gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
