@@ -9,6 +9,8 @@
 //  Added Prediction method
 /******************************************************************************/
 
+
+#include <string>
 #include "variational.hpp"
 #include "subsample.hpp"
 #include "seeding.hpp"

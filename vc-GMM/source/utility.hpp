@@ -16,9 +16,13 @@
 #include <fstream>
 #include <iomanip>
 #include <vector>
+#include <string>
 
-#include "blaze/Blaze.h"
 #include "threads.hpp"
+
+// external dependency
+#include "blaze/Blaze.h"
+#include "cnpy.h"
 
 // computes the quantization error
 // x - dataset
@@ -77,9 +81,51 @@ std::vector<size_t> inference(const blaze::DynamicMatrix<T, blaze::rowMajor>& x,
     return assigned_clusters;
 }
 
+// reads a blaze matrix from .npy file
+template <typename T>
+void load_npy(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& x) {
+    std::cout << "reading file " << path << "..." << std::endl;
+    auto npy_array = cnpy::npy_load(path);
+    T* loaded_data = npy_array.data<T>();
+
+    size_t nrows = npy_array.shape[0];
+    size_t ncols = npy_array.shape[1];
+    
+    x.resize(nrows, ncols);
+    
+    for (size_t i = 0; i < nrows; i++) {
+        for (size_t j = 0; j < ncols; j++) {
+            x(i, j) = loaded_data[j+ncols*i];
+        }
+    }
+    
+    std::cout << "done!" << std::endl;;
+    std::cout << "data points N = " << x.rows() << std::endl;
+    std::cout << "features    D = " << x.columns() << std::endl;;
+}
+
+// write vector of size_t as a npy file
+void save_npy(const std::string& path, const std::vector<size_t>& x) {
+    cnpy::npy_save(path, &x[0], {x.size()}, "w");
+}
+
+// write vector of size_t as a npy file
+template <typename T>
+void save_npy(const std::string& path, const blaze::DynamicMatrix<T>& x) {
+    
+    std::vector<T> data;
+    for (size_t i = 0; i < x.rows(); i++) {
+        for (size_t j = 0; j < x.columns(); j++) {
+            data.emplace_back(x(i, j));
+        }
+    }
+    
+    cnpy::npy_save(path, &data[0], {data.size()}, "w");
+}
+
 // reads a blaze matrix from whitespace separated text file
 template <typename T>
-void loadtxt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& x) {
+void load_txt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& x) {
     std::cout << "reading file ";
     std::cout << path;
     std::cout << "... ";
@@ -124,7 +170,7 @@ void loadtxt(const std::string& path, blaze::DynamicMatrix<T, blaze::rowMajor>& 
 }
 
 // write vector of size_t as a text file
-void savevec(const std::string& path, const std::vector<size_t>& x) {
+void save_txt(const std::string& path, const std::vector<size_t>& x) {
     std::ofstream ofs(path);
     for (const auto& index : x) {
         ofs << index << "\n";
@@ -133,7 +179,7 @@ void savevec(const std::string& path, const std::vector<size_t>& x) {
 
 // writes blaze matrix as a text file
 template <typename T>
-void savetxt(const std::string& path, const blaze::DynamicMatrix<T>& x) {
+void save_txt(const std::string& path, const blaze::DynamicMatrix<T>& x) {
     std::ofstream ofs(path);
 
     for (size_t i = 0; i < x.rows(); i++) {
@@ -143,5 +189,6 @@ void savetxt(const std::string& path, const blaze::DynamicMatrix<T>& x) {
         ofs << "\n";
     }
 }
+
 
 #endif

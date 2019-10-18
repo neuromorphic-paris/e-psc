@@ -7,7 +7,6 @@
 // Information: Applying Florian Hirschberger's vc-GMM on event-based data from neuromorphic cameras
 /******************************************************************************/
 
-#include <string>
 #include "../source/clustering.hpp"
 
 int main(int argc, char** argv) {
@@ -15,7 +14,7 @@ int main(int argc, char** argv) {
     if (argc < 12) {
         throw std::runtime_error(std::to_string(argc).append("received. Expected 11 arguments"));
     } else {
-        
+
         // APPLICATION PARAMETERS
         std::string path_train_features = argv[1];             // path to training features text file
         std::string path_test_features  = argv[2];             // path to test features text file
@@ -32,30 +31,27 @@ int main(int argc, char** argv) {
         int nthreads = std::thread::hardware_concurrency();    // number of C++11 threads
         
         // READING DATA
-        blaze::DynamicMatrix<double, blaze::rowMajor> train_features;
-        loadtxt(path_train_features, train_features); // read training dataset
+        blaze::DynamicMatrix<float, blaze::rowMajor> train_features;
+        load_npy(path_train_features, train_features); // read training dataset
 
-        blaze::DynamicMatrix<double, blaze::rowMajor> train_features2;
-        loadtxt(path_train_features, train_features2); // read training dataset
-        
-        blaze::DynamicMatrix<double, blaze::rowMajor> test_features;
-        loadtxt(path_test_features, test_features); // read test dataset
-        
+        blaze::DynamicMatrix<float, blaze::rowMajor> test_features;
+        load_npy(path_test_features, test_features); // read test dataset
+
         // FITTING MODEL TO TRAINING DATASET
-        clustering<double> vc_GMM(train_features, N_core, C, chain_length, C_p, G, plus1, nthreads, seed);
+        clustering<float> vc_GMM(train_features, N_core, C, chain_length, C_p, G, plus1, nthreads, seed);
 
         vc_GMM.converge(convergence_threshold); // computes EM-iterations until the relative change in free energy falls below the convergence threshold
-        auto training_assignments = vc_GMM.predict(train_features2); // returns the cluster assignments for the train dataset
+        auto training_assignments = vc_GMM.predict(train_features); // returns the cluster assignments for the train dataset
         auto test_assignments = vc_GMM.predict(test_features); // returns the cluster assignments for the test dataset
-        
+
         // writing the cluster centers to a text file
         if (save_centers) {
-            savetxt("gmm_centers.txt", vc_GMM.cluster_centers());
+            save_npy("gmm_centers.npy", vc_GMM.cluster_centers());
         }
-        
+
         if (save_prediction) {
-            savevec("gmm_train_labels.txt", training_assignments);
-            savevec("gmm_test_labels.txt", test_assignments);
+            save_npy("gmm_train_labels.npy", training_assignments);
+            save_npy("gmm_test_labels.npy", test_assignments);
         }
     }
     
