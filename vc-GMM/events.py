@@ -17,14 +17,13 @@ import matplotlib.pyplot as plt
 #### PARAMETERS ####
 
 create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
-save_astxt = True # choose to save the features as a .txt file
+save = False # choose to save the features as a .npy file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
-C=5
+C=100
 create_histograms = True
 
-gaussian_ts = False # choose between exponential time surfaces and gaussian time surfaces
-ts_size = 13  # size of the time surfaces
+ts_size = 11  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
@@ -38,7 +37,7 @@ def ts_info(ts):
 
 if create_features:
     from utilities.Cards_loader import Cards_loader
-    from utilities.Time_Surface_generators import Time_Surface_exp, Time_Surface_gauss
+    from utilities.Time_Surface_generators import Time_Surface_exp
 
     #### IMPORTING DATASET ####
     learning_set_length = 12
@@ -53,7 +52,6 @@ if create_features:
     number_of_samples = sum(sizes_of_training_samples)
 
     number_of_features = ts_size**2
-    # ts_train = np.zeros((number_of_samples, ts_size, ts_size))
 
     ts_train = []
     train_labels = []
@@ -64,43 +62,31 @@ if create_features:
             single_event = [dataset_learning[recording]
                             [0][k], dataset_learning[recording][1][k]]
 
-            if gaussian_ts:
-                # gaussian time surfaces
-                time_surface = Time_Surface_gauss(xdim=ts_size,
-                                                ydim=ts_size,
-                                                event=single_event,
-                                                sigma=100,
-                                                dataset=dataset_learning[recording],
-                                                num_polarities=polarities,
-                                                minv=0.1,
-                                                verbose=False)
-            else:
-                # exponential time surfaces
-                time_surface = Time_Surface_exp(xdim=ts_size,
-                                                ydim=ts_size,
-                                                event=single_event,
-                                                timecoeff=tau,
-                                                dataset=dataset_learning[recording],
-                                                num_polarities=polarities,
-                                                minv=0.1,
-                                                verbose=False)
-            # if np.count_nonzero(time_surface): # improvement needed for minimum activity
+            # exponential time surfaces
+            time_surface = Time_Surface_exp(xdim=ts_size,
+                                            ydim=ts_size,
+                                            event=single_event,
+                                            timecoeff=tau,
+                                            dataset=dataset_learning[recording],
+                                            num_polarities=polarities,
+                                            minv=0.1,
+                                            verbose=False)
+                                            
             if ts_info(time_surface)>1: # improvement needed for minimum activity
                 ts_train.append(time_surface)
                 train_labels.append(labels_learning[recording])
                 idx += 1
         pip_trdpt.append(idx)
-    pip_trdpt = np.array(pip_trdpt)
-    ts_train = np.array(ts_train)
+        
+    pip_trdpt = np.array(pip_trdpt, np.int32)
+    ts_train = np.array(ts_train, np.float32)
     ts_train = ts_train.reshape((ts_train.shape[0], -1))
-    train_labels = np.array(train_labels)
+    train_labels = np.array(train_labels, np.int32)
 
     #### BUILDING THE TESTING DATASET ####
     sizes_of_testing_samples = [len(dataset_testing[j][0]) for j in range(len(dataset_testing))]
 
     number_of_samples = sum(sizes_of_testing_samples)
-    # ts_test = np.zeros((number_of_samples, ts_size, ts_size))
-
     ts_test = []
     test_labels = []
     pip_tedpt = []
@@ -109,68 +95,58 @@ if create_features:
         for k in range(len(dataset_testing[recording][0])):
             single_event = [dataset_testing[recording]
                             [0][k], dataset_testing[recording][1][k]]
-            if gaussian_ts:
-                # gaussian time surfaces
-                time_surface = Time_Surface_gauss(xdim=ts_size,
-                                                ydim=ts_size,
-                                                event=single_event,
-                                                sigma=100,
-                                                dataset=dataset_learning[recording],
-                                                num_polarities=polarities,
-                                                minv=0.1,
-                                                verbose=False)
-            else:
-                # exponential time surfaces
-                time_surface = Time_Surface_exp(xdim=ts_size,
-                                                ydim=ts_size,
-                                                event=single_event,
-                                                timecoeff=tau,
-                                                dataset=dataset_learning[recording],
-                                                num_polarities=polarities,
-                                                minv=0.1,
-                                                verbose=False)
 
-            # if np.count_nonzero(time_surface):
+            # exponential time surfaces
+            time_surface = Time_Surface_exp(xdim=ts_size,
+                                            ydim=ts_size,
+                                            event=single_event,
+                                            timecoeff=tau,
+                                            dataset=dataset_testing[recording],
+                                            num_polarities=polarities,
+                                            minv=0.1,
+                                            verbose=False)
+
             if ts_info(time_surface)>1: # improvement needed for minimum activity
                 ts_test.append(time_surface)
                 test_labels.append(labels_testing[recording])
                 idx += 1
         pip_tedpt.append(idx)
-    pip_tedpt = np.array(pip_tedpt)
-    ts_test = np.array(ts_test)
+        
+    pip_tedpt = np.array(pip_tedpt, np.int32)
+    ts_test = np.array(ts_test, np.float32)
     ts_test = ts_test.reshape((ts_test.shape[0], -1))
-    test_labels = np.array(test_labels)
+    test_labels = np.array(test_labels, np.int32)
 
-    if save_astxt:
-        np.savetxt('features/poker_ts_train.txt', ts_train) # save the training features as a text file
-        np.savetxt('features/poker_ts_test.txt', ts_test) # save the test features as a text file
+    if save:
+        np.save('features/poker_ts_train.npy', ts_train) # save the training features as an npy file
+        np.save('features/poker_ts_test.npy', ts_test) # save the test features as an npy file
 
-        np.savetxt('features/poker_train_labels.txt', train_labels, fmt='%i') # save the training labels as a text file
-        np.savetxt('features/poker_test_labels.txt', test_labels, fmt='%i') # save the test labels as a text file
+        np.save('features/poker_train_labels.npy', train_labels) # save the training labels as a text file
+        np.save('features/poker_test_labels.npy', test_labels) # save the test labels as an npy file
 
-        np.savetxt('features/poker_train_nts.txt', pip_trdpt, fmt='%i') # save the training labels as a text file
-        np.savetxt('features/poker_test_nts.txt', pip_tedpt, fmt='%i') # save the test labels as a text file
+        np.save('features/poker_train_nts.npy', pip_trdpt) # save the training labels as an npy file
+        np.save('features/poker_test_nts.npy', pip_tedpt) # save the test labels as an npy file
 
 #### VC-GMM CLUSTERING ON LEARNING DATASET ####
 if vc_gmm_clustering:
     import subprocess
 
     cmd_list = ["build/release/events",        # path to the C++ executable for clustering
-                "features/poker_ts_train.txt", # path to the training features (saved in a text file)
-                "features/poker_ts_test.txt",  # path to the test features (saved in a text file)
-                "5",                           # int - C_p - number of clusters considered for each data point
-                "5",                           # int - G - search space (nearest neighbours for the C' clusters)
+                "features/poker_ts_train.npy", # path to the training features (saved in a text file)
+                "features/poker_ts_test.npy",  # path to the test features (saved in a text file)
+                "4",                           # int - C_p - number of clusters considered for each data point
+                "4",                           # int - G - search space (nearest neighbours for the C' clusters)
                 "1",                           # bool - plus1 - include one additional randomly chosen cluster
-                "10000",                       # int - N_core - size of subset
-                str(C),                         # int - C - number of cluster centers
-                "5",                          # int - chain_length - chain length for AFK-MC² seeding
+                "2000",                        # int - N_core - size of subset
+                str(C),                        # int - C - number of cluster centers
+                "5",                           # int - chain_length - chain length for AFK-MC² seeding
                 "0.0001",                      # float - convergence_threshold
                 "1",                           # bool - save_centers - write cluster centers to a text file
                 "1",                           # bool - save_prediction - write assigned clusters to a text file
                ]
     subprocess.call(cmd_list)
 
-#### AVERAGE HISTOGRAM OF ACTIVATED CLUSTERS ON LEARNING DATASET ####
+#### AVERAGE HISTOGRAM OF ACTIVATED CLUSTERS ####
 
 if create_histograms:
     from utilities.Cards_loader import Cards_loader
@@ -189,18 +165,19 @@ if create_histograms:
     number_of_features = ts_size**2
     ts_train = np.zeros((number_of_samples, ts_size, ts_size))
 
-    tef= np.loadtxt("gmm_test_labels.txt").astype(np.int)
-    trf= np.loadtxt("gmm_train_labels.txt").astype(np.int)
-    trl= np.loadtxt("features/poker_train_labels.txt").astype(np.int)
-    tel= np.loadtxt("features/poker_test_labels.txt").astype(np.int)
-    trdpt= np.loadtxt("features/poker_train_nts.txt").astype(np.int)
-    tedpt= np.loadtxt("features/poker_test_nts.txt").astype(np.int)
+    tef= np.load("gmm_test_labels.npy")
+    trf= np.load("gmm_train_labels.npy")
+    trl= np.load("features/poker_train_labels.npy")
+    tel= np.load("features/poker_test_labels.npy")
+    trdpt= np.load("features/poker_train_nts.npy")
+    tedpt= np.load("features/poker_test_nts.npy")
+    
     assert trdpt.sum()==trf.shape[0]
     assert trdpt.sum()==trl.shape[0]
     assert tedpt.sum()==tef.shape[0]
     assert tedpt.sum()==tel.shape[0]
 
-    # C=200
+    ### Training Features ####
     train_labels = []
     start = 0 
     trfeats = []
@@ -223,6 +200,7 @@ if create_histograms:
     number_of_samples = sum(sizes_of_testing_samples)
     ts_test = np.zeros((number_of_samples, ts_size, ts_size))
 
+    ### Testing Features ####
     test_labels = []
     start = 0 
     stop = 0
@@ -240,6 +218,7 @@ if create_histograms:
 
     tefeats = np.array(tefeats)
     telabel = np.array(telabel)
+
 
     from sklearn.naive_bayes import GaussianNB
     from sklearn import metrics
@@ -314,11 +293,3 @@ if create_histograms:
           % (svc, metrics.classification_report(trlabel, svc_pl_tr)))
     print("Support Vector Confusion matrix on training:\n%s" %
           metrics.confusion_matrix(trlabel, svc_pl_tr))
-
-
-    # print("GaussianNB score: {}".format(score))
-
-
-#### VC-GMM CLUSTERING ON TEST DATASET ####
-
-#### CLASSIFICATION OF TEST SET VIA HISTOGRAM DISTANCE COMPARISION ####

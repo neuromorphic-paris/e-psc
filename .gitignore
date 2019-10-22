@@ -40,3 +40,5 @@ vc-GMM/features/
 vc-GMM/source/StatsLib/
 
 vc-GMM/gmm_centers.txt
+
+vc-GMM/datasets/simple/arr.npy

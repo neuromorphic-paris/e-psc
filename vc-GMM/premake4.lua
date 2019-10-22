@@ -28,11 +28,12 @@ solution 'vc-GMM'
 
 	        configuration 'linux or macosx'
             	includedirs {'/usr/local/include'}
-	        	  libdirs {'/usr/local/lib'}
+	        	libdirs {'/usr/local/lib'}
+                links('cnpy')
 
 	        -- Linux specific settings
 	        configuration 'linux'
-              links {'pthread'}
+                links {'pthread'}
 	            buildoptions {'-std=c++17'}
 	           	linkoptions {'-std=c++17'}
 

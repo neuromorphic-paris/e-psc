@@ -73,3 +73,12 @@ cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/
 sudo make install
 ~~~~
+
+# Installing NPY C++ library to /usr/local/
+~~~~
+git clone https://github.com/rogersce/cnpy.git ./cnpy
+mkdir build && cd build
+cmake ./cnpy
+make
+make install
+~~~~
