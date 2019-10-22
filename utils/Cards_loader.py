@@ -8,7 +8,7 @@ Function loading the Cards dataset
 """
 import numpy as np
 # for reading the aedat files
-from readwriteatis_kaerdat import readATIS_td
+#from readwriteatis_kaerdat import readATIS_td
 
 def Cards_loader(data_folder, learning_set_length, testing_set_length, shuffle_seed):
     # Dataset settings
