@@ -44,7 +44,7 @@ def shinfo(x):
 learning = True# Decide whether to run the sparse coding algorithm
 classification = True  # Run classification
 resume  = False #True
-ts_size = 13  # size of the time surfaces
+ts_size = 11  # size of the time surfaces
 tau = 5000  # time constant for the construction of time surfaces
 polarities = 1  # number of polarities that we will use in the dataset (1 because polarities are not informative in the cards dataset)
 
@@ -151,7 +151,7 @@ if learning:
     D = ts_size**2    # dimensionality of observed data
 
     # Approximation parameters for Expectation Truncation (It has to be Hprime>=gamma)
-    Hprime = 4
+    Hprime = 3
     gamma = 3
     states = np.array([0,1])
 
@@ -213,7 +213,7 @@ if resume:
 
     # Approximation parameters for Expectation Truncation
     # (It has to be Hprime>=gamma)
-    Hprime = 4
+    Hprime = 3
     gamma = 3
     states = np.array([0,1])
 
