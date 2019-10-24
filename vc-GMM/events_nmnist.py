@@ -43,10 +43,10 @@ if create_features:
     learning_set_length = 12
     testing_set_length = 5
 
-    data_folder = "../datasets/pips/"
-    dataset_learning, labels_learning, filenames_learning, dataset_testing, labels_testing, filenames_testing = Cards_loader(
-        data_folder, learning_set_length, testing_set_length, shuffle_seed)
-
+    data_folder = "../datasets/"
+    fh = tb.open_file(data_folder+'nmnist_one_saccade.h5','r')
+    
+    
     #### BUILDING THE TRAINING DATASET ####
     sizes_of_training_samples = [len(dataset_learning[j][0]) for j in range(len(dataset_learning))]
     number_of_samples = sum(sizes_of_training_samples)
@@ -56,28 +56,31 @@ if create_features:
     ts_train = []
     train_labels = []
     pip_trdpt = []
-    for recording in range(len(dataset_learning)):
+    
+    for recording in fh.root.train:
         idx = 0
-        for k in range(len(dataset_learning[recording][0])):
-            single_event = [dataset_learning[recording]
-                            [0][k], dataset_learning[recording][1][k]]
-
-            # exponential time surfaces
+        data = recording.read()
+        for k in range(data.shape[0]):
+            single_event = [data[k,1], data[k,2]]
+            
+            dataset = [data[:, 0].astype(np.int),
+                       data[:, 1:3].astype(np.int),
+                       data[:, 3].astype(np.int)-1]
+            
             time_surface = Time_Surface_exp(xdim=ts_size,
                                             ydim=ts_size,
                                             event=single_event,
                                             timecoeff=tau,
-                                            dataset=dataset_learning[recording],
+                                            dataset=dataset,
                                             num_polarities=polarities,
                                             minv=0.1,
                                             verbose=False)
-                                            
             if ts_info(time_surface)>1: # improvement needed for minimum activity
-                ts_train.append(time_surface)
-                train_labels.append(labels_learning[recording])
+                ts.append(time_surface)
+                train_labels.append(int(data[0,-1]))
                 idx += 1
         pip_trdpt.append(idx)
-        
+
     pip_trdpt = np.array(pip_trdpt, np.int32)
     ts_train = np.array(ts_train, np.float32)
     ts_train = ts_train.reshape((ts_train.shape[0], -1))
@@ -90,25 +93,29 @@ if create_features:
     ts_test = []
     test_labels = []
     pip_tedpt = []
-    for recording in range(len(dataset_testing)):
+    
+    for recording in fh.root.test:
         idx = 0
-        for k in range(len(dataset_testing[recording][0])):
-            single_event = [dataset_testing[recording]
-                            [0][k], dataset_testing[recording][1][k]]
-
-            # exponential time surfaces
+        data = recording.read()
+        for k in range(data.shape[0]):
+            single_event = [data[k,1], data[k,2]]
+            
+            dataset = [data[:, 0].astype(np.int),
+                       data[:, 1:3].astype(np.int),
+                       data[:, 3].astype(np.int)-1]
+            
             time_surface = Time_Surface_exp(xdim=ts_size,
                                             ydim=ts_size,
                                             event=single_event,
                                             timecoeff=tau,
-                                            dataset=dataset_testing[recording],
+                                            dataset=dataset,
                                             num_polarities=polarities,
                                             minv=0.1,
                                             verbose=False)
-
+        
             if ts_info(time_surface)>1: # improvement needed for minimum activity
                 ts_test.append(time_surface)
-                test_labels.append(labels_testing[recording])
+                test_labels.append(int(data[0,-1])
                 idx += 1
         pip_tedpt.append(idx)
         
