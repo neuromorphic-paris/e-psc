@@ -61,14 +61,19 @@ sudo make install
 git clone https://github.com/kthohr/gcem ./gcem
 ~~~~
 
-2. make a build directory:
+2. make sure zlib is installed if you're on Linux
+~~~~
+sudo apt-get install zlib1g-dev
+~~~~
+
+3. make a build directory:
 ~~~~
 cd ./gcem
 mkdir build
 cd build
 ~~~~
 
-3. generate Makefiles and install
+4. generate Makefiles and install
 ~~~~
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/
 sudo make install
@@ -80,5 +85,5 @@ git clone https://github.com/rogersce/cnpy.git ./cnpy
 mkdir build && cd build
 cmake ./cnpy
 make
-make install
+sudo make install
 ~~~~
