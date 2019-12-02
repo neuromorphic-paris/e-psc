@@ -45,7 +45,7 @@ sudo apt install premake4
 1. get the source code from here: https://bitbucket.org/blaze-lib/blaze/src/master/
 2. on linux install dependencies (nothing to do on mac)
 ~~~~
-apt-get install libblas-dev liblapack-dev
+sudo apt-get install libblas-dev liblapack-dev
 ~~~~
 
 3. generate Makefiles and install
