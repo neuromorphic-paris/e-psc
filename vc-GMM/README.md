@@ -48,7 +48,7 @@ sudo apt install premake4
 sudo apt-get install libblas-dev liblapack-dev
 ~~~~
 
-3. generate Makefiles and install
+3. go to the extracted blaze folder and generate Makefiles and install
 ~~~~
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local/
 sudo make install
@@ -83,7 +83,7 @@ sudo make install
 ~~~~
 git clone https://github.com/rogersce/cnpy.git ./cnpy
 mkdir build && cd build
-cmake ./cnpy
+cmake ../cnpy
 make
 sudo make install
 ~~~~
