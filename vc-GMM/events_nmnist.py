@@ -118,7 +118,7 @@ if create_features:
                 test_labels.append(int(data[0,-1])
                 idx += 1
         pip_tedpt.append(idx)
-        
+
     pip_tedpt = np.array(pip_tedpt, np.int32)
     ts_test = np.array(ts_test, np.float32)
     ts_test = ts_test.reshape((ts_test.shape[0], -1))
