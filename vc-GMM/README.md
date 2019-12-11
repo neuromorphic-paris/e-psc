@@ -45,10 +45,10 @@ sudo apt install premake4
 1. get the source code from here: https://bitbucket.org/blaze-lib/blaze/src/master/
 2. on linux install dependencies (nothing to do on mac)
 ~~~~
-apt-get install libblas-dev liblapack-dev
+sudo apt-get install libblas-dev liblapack-dev
 ~~~~
 
-3. generate Makefiles and install
+3. go to the extracted blaze folder and generate Makefiles and install
 ~~~~
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local/
 sudo make install
@@ -61,14 +61,19 @@ sudo make install
 git clone https://github.com/kthohr/gcem ./gcem
 ~~~~
 
-2. make a build directory:
+2. make sure zlib is installed if you're on Linux
+~~~~
+sudo apt-get install zlib1g-dev
+~~~~
+
+3. make a build directory:
 ~~~~
 cd ./gcem
 mkdir build
 cd build
 ~~~~
 
-3. generate Makefiles and install
+4. generate Makefiles and install
 ~~~~
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/
 sudo make install
@@ -78,7 +83,7 @@ sudo make install
 ~~~~
 git clone https://github.com/rogersce/cnpy.git ./cnpy
 mkdir build && cd build
-cmake ./cnpy
+cmake ../cnpy
 make
-make install
+sudo make install
 ~~~~
