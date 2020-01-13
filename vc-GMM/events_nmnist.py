@@ -11,12 +11,13 @@
 #     4. classification by building histogram of the test set and comparing to the learned histograms via distance (Euclidean and Bhattacharyya)
 
 import numpy as np
+import tables as tb
 import seaborn as sn
 import matplotlib.pyplot as plt
 
 #### PARAMETERS ####
 
-create_features = False; # choose whether to import the dataset and create time surfaces or load from an existing npy file
+create_features = True; # choose whether to import the dataset and create time surfaces or load from an existing npy file
 save = True # choose to save the features as a .npy file
 shuffle_seed = 12 # seed used for dataset shuffling, if set to 0 the process will be totally random
 
@@ -48,9 +49,6 @@ if create_features:
     
     
     #### BUILDING THE TRAINING DATASET ####
-    sizes_of_training_samples = [len(dataset_learning[j][0]) for j in range(len(dataset_learning))]
-    number_of_samples = sum(sizes_of_training_samples)
-
     number_of_features = ts_size**2
 
     ts_train = []
@@ -61,7 +59,7 @@ if create_features:
         idx = 0
         data = recording.read()
         for k in range(data.shape[0]):
-            single_event = [data[k,1], data[k,2]]
+            single_event = [data[k,0],[data[k,1], data[k,2]]]
             
             dataset = [data[:, 0].astype(np.int),
                        data[:, 1:3].astype(np.int),
@@ -76,7 +74,7 @@ if create_features:
                                             minv=0.1,
                                             verbose=False)
             if ts_info(time_surface)>1: # improvement needed for minimum activity
-                ts.append(time_surface)
+                ts_train.append(time_surface)
                 train_labels.append(int(data[0,-1]))
                 idx += 1
         pip_trdpt.append(idx)
@@ -87,9 +85,6 @@ if create_features:
     train_labels = np.array(train_labels, np.int32)
 
     #### BUILDING THE TESTING DATASET ####
-    sizes_of_testing_samples = [len(dataset_testing[j][0]) for j in range(len(dataset_testing))]
-
-    number_of_samples = sum(sizes_of_testing_samples)
     ts_test = []
     test_labels = []
     pip_tedpt = []
@@ -98,7 +93,7 @@ if create_features:
         idx = 0
         data = recording.read()
         for k in range(data.shape[0]):
-            single_event = [data[k,1], data[k,2]]
+            single_event = [data[k,0],[data[k,1], data[k,2]]]
             
             dataset = [data[:, 0].astype(np.int),
                        data[:, 1:3].astype(np.int),
@@ -115,7 +110,7 @@ if create_features:
         
             if ts_info(time_surface)>1: # improvement needed for minimum activity
                 ts_test.append(time_surface)
-                test_labels.append(int(data[0,-1])
+                test_labels.append(int(data[0,-1]))
                 idx += 1
         pip_tedpt.append(idx)
         
@@ -165,9 +160,6 @@ if create_histograms:
     dataset_learning, labels_learning, filenames_learning, dataset_testing, labels_testing, filenames_testing = Cards_loader(
         data_folder, learning_set_length, testing_set_length, shuffle_seed)
 
-    #### BUILDING THE TRAINING DATASET ####
-    sizes_of_training_samples = [len(dataset_learning[j][0]) for j in range(len(dataset_learning))]
-    number_of_samples = sum(sizes_of_training_samples)
 
     number_of_features = ts_size**2
     ts_train = np.zeros((number_of_samples, ts_size, ts_size))
@@ -200,12 +192,6 @@ if create_histograms:
         start = stop
     trfeats = np.array(trfeats)
     trlabel = np.array(trlabel)
-
-    #### BUILDING THE TESTING DATASET ####
-    sizes_of_testing_samples = [len(dataset_testing[j][0]) for j in range(len(dataset_testing))]
-
-    number_of_samples = sum(sizes_of_testing_samples)
-    ts_test = np.zeros((number_of_samples, ts_size, ts_size))
 
     ### Testing Features ####
     test_labels = []
