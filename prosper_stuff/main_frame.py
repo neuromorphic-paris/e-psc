@@ -89,15 +89,17 @@ if comm.rank==0:
     print("Reading Time {}".format(endtime-starttime))
     NN = sts.shape[0]//nprocs
     NNN = sts_test.shape[0]//nprocs
-    sts_test = sts_test[:NNN].reshape((nprocs,NNN))
-    stesting_labels = stesting_labels[:NNN].reshape((nprocs,NNN))
-    sts= sts[:NN].reshape((nprocs,NN))
-    straining_labels = straining_labels[:NN].reshape((nprocs,NN))
+    sts_test = sts_test[:NNN*nprocs].reshape((nprocs,NNN))
+    stesting_labels = stesting_labels[:NNN*nprocs].reshape((nprocs,NNN))
+    sts= sts[:NN*nprocs].reshape((nprocs,NN))
+    straining_labels = straining_labels[:NN*nprocs].reshape((nprocs,NN))
 
 ts = comm.scatter(sts)
 training_labels = comm.scatter(straining_labels)
+train_labels = training_labels
 ts_test = comm.scatter(sts_test)
 testing_labels = comm.scatter(stesting_labels)
+test_labels = testing_labels
 #
 pp("2nd rank: {}, ts.shape: {}, train_labels.shape: {}".format(comm.rank, ts.shape, train_labels.shape))
 
